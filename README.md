@@ -6,7 +6,8 @@ Home for projects created by the City Year Python Community.
     
     1. cyschoolhouse Report Pipeline
         a. cyshReportPipeline.py
-            i. This is the most up to date version of the script.  You will need to add your username and password to the file and change the report key to the one you want to download.
+            i. This is the most up to date version of the script.  You will need to add your username and 
+            password to the file and change the report key to the one you want to download.
         b. SF_Report_Pipeline.ipynp
             i. This Jupyter notebook is what I used to develop each part of the script.
 
