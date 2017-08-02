@@ -5,6 +5,7 @@ Welcome!  This is a home for coding projects which are being developed by member
 ## Table of Contents
     
     1. selenium-testing
+
 	a. This folder contains various test scripts used to develop the idioms used in later products.
 
 ## How to contribute!
