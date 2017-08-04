@@ -5,7 +5,9 @@ Welcome!  This is a home for coding projects which are being developed by member
 ## Table of Contents
     
     1. selenium-testing
-       a. This folder contains a couple scripts used as a proof of concept of a few different features of Selenium.  Currently there is a file, seleniumsuite, which contains some of the more general navigation functions, and then two test files currently being used.  First the cysh-file-dl-testing script demonstrates how to use a get request to download a file after logging into Okta and cyschoolhouse using Selenium. Second, the cysh-section-creation-testing script demonstrates the creation of a single section using a csv input. 
+       a. Contains a couple scripts used as a proof of concept of a few different features of Selenium.  Currently there is a file, seleniumsuite, which contains some of the more general navigation functions, and then two test files currently being used.  First the cysh-file-dl-testing script demonstrates how to use a get request to download a file after logging into Okta and cyschoolhouse using Selenium. Second, the cysh-section-creation-testing script demonstrates the creation of a single section using a csv input.
+    2. cyschoolhouse
+       a. Contains scripts for automating actions in cyschoolhouse. In current development.
 
 ## Dependencies
 The main dependencies are Selenium and selenium-requests.  Make sure to follow the Selenium install instruction carefully, particularly in making sure that you have the appropriate driver for the browser you would like to use. The current scripts expect you to use Firefox, which uses the gecko driver. Besides that, all other packages used are a part of the python core. 

@@ -58,7 +58,6 @@ def selenium_test_file_dl():
     driver = open_cyschoolhouse17(driver)
     driver = download_testfile_post(driver)
     driver.quit()
-    return response
     
 if __name__ == "__main__":
-    response = selenium_test_file_dl()
+    selenium_test_file_dl()
