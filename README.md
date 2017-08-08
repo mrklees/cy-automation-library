@@ -1,6 +1,6 @@
-# City Year Python Library
+# City Year Automation Library
 
-Welcome!  This is a home for coding projects which are being developed by members of the City Year Python Community. A current primary focus is web automation.  Many tasks that are given to impact points involve needless amounts of repetitive activity on SalesForce or in other contexts.  Using tools like Selenium we can automate many of these tasks.  Our goal is to create wrappers which allows a user to pass in some parameters in the form of a csv, and have Selenium create sections, enroll students, and make focus list changes based on that. 
+Welcome!  This is a home for automation projects which are being developed by members of the City Year Python Community. A current primary focus is web automation.  Many tasks that are given to impact points involve needless amounts of repetitive activity on SalesForce or in other contexts.  Using tools like Selenium we can automate many of these tasks.  Our goal is to create wrappers which allows a user to pass in some parameters in the form of a csv, and have Selenium create sections, enroll students, and make focus list changes based on that. 
 
 ## Table of Contents
     
