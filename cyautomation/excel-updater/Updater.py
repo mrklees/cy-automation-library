@@ -13,13 +13,10 @@ import logging
 
 # win32 API 
 import win32com.client as win32
-import win32file
 import win32process
 import win32gui
 import win32api
 import win32con
-import win32security
-import pywintypes
 
 def open_excel():
     # Create a connector to Excel
@@ -53,17 +50,6 @@ def open_workbook(fp, excel):
         sys.exit(1)
         
     return wb
-
-def open_file(fp):
-    secur_att = win32security.SECURITY_ATTRIBUTES()
-    secur_att.Initialize()
-    hfile=win32file.CreateFile( fp,
-			    win32con.GENERIC_READ|win32con.GENERIC_WRITE,
-			    win32con.FILE_SHARE_READ|win32con.FILE_SHARE_WRITE,
-			    secur_att, #default
-			    win32con.OPEN_ALWAYS,
-			    win32con.FILE_ATTRIBUTE_NORMAL , 0 )
-    return hfile
 
 def refresh_save_quit(wb):
     """Refreshes, saves, and closes an open Excel workbook
@@ -101,17 +87,23 @@ def get_all_filepaths(file_tree):
     return ['\\'.join([path, file]) for (path, child_dirs, files) in file_tree for file in files if file.endswith('.xlsm')]
 
 def update_all(parent_dir):
-    files = get_all_filepaths(search_tree(parent_dir))
+    all_files = search_tree(parent_dir)
     excel = open_excel()
-    for file in files:
-        wb = open_workbook(file, excel)
-        sleep(3)
-        if is_pq_available(excel):
-            refresh_save_quit(wb)
-        else:
-            print("PowerQuery has been closed.  Please force close and open Excel.")
-            break
-        sleep(3)
+    for path, child_dirs, files in all_files:
+        os.chdir(path)
+        print(path, child_dirs, files)
+        for file in files:
+            print(file)
+            if is_file_checked_out(file):
+                continue
+            wb = open_workbook('\\'.join([path, file]), excel)
+            sleep(3)
+            if is_pq_available(excel):
+               refresh_save_quit(wb)
+            else:
+                print("PowerQuery has been closed.  Please force close and open Excel.")
+                break
+            sleep(3)
     close_excel_by_force(excel)
 
 def is_pq_available(excel):
@@ -138,10 +130,17 @@ def configure_log():
     logging.basicConfig(filename='log/updater.log', level=logging.DEBUG)
     logging.info("Log of run on " + datetime.now().isoformat())
 
+def is_file_checked_out(filename):
+    try: 
+        os.rename(filename, 'tempfile.xlsx')
+        os.rename('tempfile.xlsx', filename)
+        return False
+    except OSError:
+        logging.debug(filename + ' is still open. Has not been refreshed.')
+        return True
+
 if __name__ == '__main__':
-    #fp = 'P:\\Update Zone\\Testing Zone'
+    fp = 'P:\\Update Zone\\Testing Zone'
     #fp = 'C:\\Users\\aperusse\\Desktop\\FiveFiles'
-    #configure_log()
-    #update_all(fp)
-    file = 'P:\\Update Zone\\Testing Zone\\FiveFiles\\93rd Street ES Team Impact Workbook.xlsm'
-    hfile = open_file(file)
+    configure_log()
+    update_all(fp)
