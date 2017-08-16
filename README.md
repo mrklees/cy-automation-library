@@ -12,10 +12,11 @@ Welcome!  This is a home for automation projects which are being developed by me
        a. A tool for updating all Excel workbooks in a any folder structure. 
 
 ## Dependencies
+
 The main dependencies are Selenium and selenium-requests.  Make sure to follow the Selenium install instruction carefully, particularly in making sure that you have the appropriate driver for the browser you would like to use. The current scripts expect you to use Firefox, which uses the gecko driver. Besides that, all other packages used are a part of the python core. 
 
 ## How to contribute!
 
 The easiest way to get started is to dive into the code, and when you find something that doesn't make sense post an issue!  If you keep getting an error when you're running the code, post an issue!  This doesn't require any coding beyond trying to get the scripts to run.  
 
-For those who want to start contributing code, its time to fork the project.
+If you want to contribute code to the project, the easiest thing would be to reach out to Alex at aperusse@cityyear.org and [get added to the taiga](https://tree.taiga.io/project/mrklees-cy-web-automation-library/). There you can view our current backlog of features and the progress of development. 

@@ -1,1 +1,1 @@
-python 'C:\Users\aperusse\GitHub\cy-automation-library\cyautomation\batch-files\update_fl_workbooks.bat'
+python 'C:\Users\aperusse\GitHub\cy-automation-library\cyautomation\excel-updater\update_scheduler.py'
