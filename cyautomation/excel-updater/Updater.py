@@ -135,7 +135,7 @@ def update_single_workbook(file, path, excel, protection={}, timer=8):
     sleep(3)
     return None
 
-def update_all(parent_dir, protection={}):
+def update_all(parent_dir, protection={}, timer=8):
     """Script for updating the folder
     
     Args:
@@ -151,7 +151,7 @@ def update_all(parent_dir, protection={}):
         #print(path, child_dirs, files)
         for file in files:
             print(file)
-            update_single_workbook(file, path, excel, protection)
+            update_single_workbook(file, path, excel, protection, timer=timer)
     close_excel_by_force(excel)
 
 def is_pq_available(excel):
@@ -193,8 +193,8 @@ def configure_log():
     """Configures the log for update cycle
     
     """
-    logging.basicConfig(filename='log/updater.log', level=logging.DEBUG)
-    logging.info("Log of run on " + datetime.now().isoformat())
+    fn = datetime.now().isoformat().split(".")[0]
+    logging.basicConfig(filename="".join(['log/', "update_log_", fn, '.log']), level=logging.DEBUG)
 
 def is_file_checked_out(filename):
     """Checks if file is checked out on SharePoint

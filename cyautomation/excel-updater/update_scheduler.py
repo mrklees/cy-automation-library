@@ -21,6 +21,10 @@ def update_fl_engines():
 def update_fl_workbooks():
     path = "P:\\Update Zone\\Refresh Zone\\FL Workbooks"
     updater.update_all(path)
+  
+def update_deployment_workbook():
+    path = "P:\\Update Zone\\Refresh Zone\\Deployment SEC Workbooks"
+    updater.update_all(path, timer=30)
     
 def update_all():
     update_large_engine()
@@ -28,4 +32,5 @@ def update_all():
     update_fl_workbooks()
     
 if __name__ == "__main__":
-    update_all()
+    updater.configure_log()
+    update_deployment_workbook()
