@@ -7,7 +7,7 @@ Author: Alex Perusse
 # Python Core packages
 import os
 from time import sleep, time
-from datetime import datetime
+#from datetime import datetime
 import sys
 import logging
 
@@ -22,13 +22,15 @@ def open_excel():
     # Create a connector to Excel
     try:
         excel = win32.gencache.EnsureDispatch("Excel.Application")
+        logging.debug(":".join([str(time()), "Excel Instance Closed"]))
     except:
-        logging.critical(":".join([time.time(), "Failed to launch Excel, quit"]))
+        logging.critical(":".join([str(time()), "Failed to launch Excel, quit"]))
         return None
     #excel = win32.Dispatch("Excel.Application")
     #excel = win32.dynamic.Dispatch("Excel.Application")
     excel.Visible = True
     excel.DisplayAlerts = False
+    
     return excel
 
 def open_workbook(fp, excel):
@@ -43,9 +45,9 @@ def open_workbook(fp, excel):
     # Leverages the connector to open a particular workbook
     try:
         wb = excel.Workbooks.Open(fp)
-        logging.debug("Opened " + fp)
+        logging.debug(":".join([str(time()), "Opened " + fp]))
     except:
-        logging.critical(":".join([time.time(), "Failed to open workbook"]))
+        logging.critical(":".join([str(time()), "Failed to open workbook"]))
         sys.exit(1)
         
     return wb
@@ -60,11 +62,13 @@ def refresh_save_quit(wb, protection, timer):
                                                        }
     """
     remove_sheet_protection(wb, protection)
+    very_unhidden(wb, protection)
     wb.RefreshAll()
     sleep(timer)
     apply_sheet_protection(wb, protection)
+    very_hidden(wb, protection)
     wb.Save()
-    logging.debug("refreshed and saved workbook; closing")
+    logging.debug("{}:refreshed and saved workbook successfully".format(time()))
     wb.Close(False)
     
 def search_tree(parent_dir):
@@ -103,13 +107,12 @@ def should_be_updated(file):
         return True
 
 def apply_sheet_protection(wb, protection):
-    """Apply sheet protection to specified sheet(s)
+    """Apply sheet protection to sheets specified by protection dict
     
     Args:
         wb (Workbook socket): the workbook
         protection (Dict): parameters for protection { protect : [sheetnames],
-                                                       veryhide : [sheetnames] 
-                                                       }
+                                                       veryhide : [sheetnames] }
     """
     sheetnames = protection.get('protect', [])
     for sheet in sheetnames:
@@ -117,12 +120,56 @@ def apply_sheet_protection(wb, protection):
         ws.Protect(Password="Lighthouse", DrawingObjects=True, Contents=True, Scenarios=True)
 
 def remove_sheet_protection(wb, protection):
+    """Remove sheet protection to based on protection parameter dict
+    
+    Args:
+        wb (Workbook socket): the workbook
+        protection (Dict): parameters for protection { protect : [sheetnames],
+                                                       veryhide : [sheetnames] }
+    """
     sheetnames = protection.get('protect', [])
     for sheet in sheetnames:
         ws = wb.Sheets(sheet)
         ws.Unprotect(Password="Lighthouse")
 
+def very_hidden(wb, protection):
+    """Apply sheet protection to specified sheet(s)
+    
+    Args:
+        wb (Workbook socket): the workbook
+        protection (Dict): parameters for protection { protect : [sheetnames],
+                                                       veryhide : [sheetnames] }
+    """
+    sheetnames = protection.get('veryhide', [])
+    for sheet in sheetnames:
+        ws = wb.Sheets(sheet)
+        ws.Visible = 2
+        
+def very_unhidden(wb, protection):
+    """Apply sheet protection to specified sheet(s)
+    
+    Args:
+        wb (Workbook socket): the workbook
+        protection (Dict): parameters for protection { protect : [sheetnames],
+                                                       veryhide : [sheetnames] }
+    """
+    sheetnames = protection.get('veryhide', [])
+    for sheet in sheetnames:
+        ws = wb.Sheets(sheet)
+        ws.Visible = -1
+
 def update_single_workbook(file, path, excel, protection={}, timer=8):
+    """Routine for updating a simple workbook
+    
+    Args:
+        file (str): The name of the file to update
+        path (str): The path to the folder containing the file
+        excel (Excel Connector): The open win32 Excel Application driver
+        protection (Dict): parameters for protection { protect : [sheetnames],
+                                                       veryhide : [sheetnames] 
+                                                       }
+        timer (int): the amount of time workbooks will need to update all queries
+    """
     if is_file_checked_out(file):
         return None
     wb = open_workbook('\\'.join([path, file]), excel)
@@ -130,12 +177,12 @@ def update_single_workbook(file, path, excel, protection={}, timer=8):
     if is_pq_available(excel):
        refresh_save_quit(wb, protection, timer=timer)
     else:
-        print("PowerQuery has been closed.  Please force close and open Excel.")
+        logging.critical(":".join([str(time()), "PowerQuery has been closed.  Please force close and open Excel."]))
         return None
     sleep(3)
     return None
 
-def update_all(parent_dir, protection={}, timer=8):
+def update_all(parent_dir, protection={}, timer=8, excel=''):
     """Script for updating the folder
     
     Args:
@@ -145,14 +192,16 @@ def update_all(parent_dir, protection={}, timer=8):
                                                }
     """
     all_files = search_tree(parent_dir)
-    excel = open_excel()
+    if excel == '':
+        excel = open_excel()
     for path, child_dirs, files in all_files:
         os.chdir(path)
         #print(path, child_dirs, files)
         for file in files:
             print(file)
             update_single_workbook(file, path, excel, protection, timer=timer)
-    close_excel_by_force(excel)
+    if excel == '':
+        close_excel_by_force(excel)
 
 def is_pq_available(excel):
     """Checks if PowerQuery is connected to Excel
@@ -193,7 +242,7 @@ def configure_log():
     """Configures the log for update cycle
     
     """
-    fn = datetime.now().isoformat().split(".")[0]
+    fn = str(time()).split(".")[0]
     logging.basicConfig(filename="".join(['log/', "update_log_", fn, '.log']), level=logging.DEBUG)
 
 def is_file_checked_out(filename):
@@ -217,11 +266,11 @@ def is_file_checked_out(filename):
         os.rename('tempfile.xlsx', filename)
         return False
     except OSError:
-        logging.debug(filename + ' is still open. Has not been refreshed.')
+        logging.critical("{}:".format(time()) + filename + ' is still open. Has not been refreshed.')
         return True
 
-if __name__ == '__main__':
-    fp = 'P:\\Update Zone\\Refresh Zone\\FL Workbooks'
-    #fp = 'C:\\Users\\aperusse\\Desktop\\FiveFiles'
-    configure_log()
-    update_all(fp, {'protect':['Dashboard']})
+#if __name__ == '__main__':
+#    fp = 'P:\\Update Zone\\Refresh Zone\\FL Workbooks'
+#    fp = 'C:\\Users\\aperusse\\Desktop\\FiveFiles'
+#    configure_log()
+#    update_all(fp, {'protect':['Dashboard']})
