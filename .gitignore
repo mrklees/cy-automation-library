@@ -2,4 +2,4 @@
 *.log
 *.pyc
 selenium-testing/testfile.csv
-batch-files
+batch-files/*
