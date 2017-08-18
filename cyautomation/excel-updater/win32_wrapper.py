@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
-'''
-Excel Updated
+"""Excep Updater Wrapper Functions
 
-Author: Alex Perusse
-'''
+This modules is intended to build a layer of abstraction on top of the win32com
+api. The goal is for the user to be able to import this module into a script where they
+acutally implament the updating of specific workbooks. 
+
+"""
 # Python Core packages
 import os
 from time import sleep, time
+
 #from datetime import datetime
 import sys
 import logging
@@ -188,8 +191,9 @@ def update_all(parent_dir, protection={}, timer=8, excel=''):
     Args:
         parent_dir (str): Filepath of the top level directory to update.  Will recurse through children.
         protection (Dict): parameters for protection { protect : [sheetnames],
-                                               veryhide : [sheetnames] 
-                                               }
+                                                       veryhide : [sheetnames] }
+        timer (Int): The amount of time to pause after trigger the query update. Increase for larger workbooks.
+        excel (Excel Connector): 
     """
     all_files = search_tree(parent_dir)
     if excel == '':
