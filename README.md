@@ -9,11 +9,13 @@ Welcome!  This is a home for automation projects which are being developed by me
     2. cyschoolhouse
        a. Contains scripts for automating actions in cyschoolhouse. In current development.
     3. excel-updater
-       a. A tool for updating all Excel workbooks in a any folder structure. 
+       a. A tool for updating Excel Workbooks. Can currently update excel workbooks, handle sheet protection and hiding, and provides a structure for writing functions to update specific workbooks in a particular order.  
 
 ## Dependencies
 
-The main dependencies are Selenium and selenium-requests.  Make sure to follow the Selenium install instruction carefully, particularly in making sure that you have the appropriate driver for the browser you would like to use. The current scripts expect you to use Firefox, which uses the gecko driver. Besides that, all other packages used are a part of the python core. 
+For projects 1 and 2, the main dependencies are [Selenium](http://selenium-python.readthedocs.io/) and [selenium-requests](https://github.com/cryzed/Selenium-Requests) which are available via pip.  Make sure to follow the Selenium install instruction carefully, particularly in making sure that you have the appropriate driver for the browser you would like to use. The current scripts expect you to use Firefox, which uses the [gecko driver](https://github.com/mozilla/geckodriver/releases). Besides that, all other packages used are a part of the python core. 
+
+For the excel updater we ustilize the win32 api in order to essentially send commands to Excel as if we were VBA or something more native.  To use this script you will need to [download and install Build 221 from sourceforge.](https://sourceforge.net/projects/pywin32/files/pywin32/)
 
 ## How to contribute!
 
