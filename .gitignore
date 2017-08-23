@@ -4,3 +4,4 @@
 selenium-testing/testfile.csv
 /batch-files/*
 *.bat
+geckodriver/geckodriver.exe

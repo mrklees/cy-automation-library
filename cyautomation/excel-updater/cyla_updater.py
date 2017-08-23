@@ -15,11 +15,18 @@ import logging
 from time import time
 
 def update_large_engine(excel):
+    """Update very large Engines
+
+    This function updates all files in the specified files list.  The key reason for making this a
+    function of its own is in setting the timer to be 90 seconds instead of the standard 8.  This is 
+    because the queries take an extremely long time for these engines to update.  
+    
+    """
     path = "P:\\Update Zone\\Databases"
     files = ["FY18 Five Col to Enrollment Report Transformation.xlsx"]    
     os.chdir(path)
     for file in files:
-        win32_wrapper.update_single_workbook(file, path, excel, timer=60)
+        win32_wrapper.update_single_workbook(file, path, excel, timer=90)
 
 def update_small_engines(excel):
     path = "P:\\Update Zone\\Databases"

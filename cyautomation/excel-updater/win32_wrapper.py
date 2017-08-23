@@ -242,12 +242,12 @@ def close_excel_by_force(excel):
     except:
         pass
 
-def configure_log():
+def configure_log(log_folder):
     """Configures the log for update cycle
     
     """
     fn = str(time()).split(".")[0]
-    logging.basicConfig(filename="".join(['log/', "update_log_", fn, '.log']), level=logging.DEBUG)
+    logging.basicConfig(filename="".join([log_folder, '/log/update_', fn, '.log']), level=logging.DEBUG)
 
 def is_file_checked_out(filename):
     """Checks if file is checked out on SharePoint
