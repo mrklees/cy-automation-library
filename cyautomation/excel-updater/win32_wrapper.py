@@ -245,6 +245,7 @@ def close_excel_by_force(excel):
 def configure_log(log_folder):
     """Configures the log for update cycle
     
+    Currently uses a log folder and creates a file called update_{timestamp}.log
     """
     fn = str(time()).split(".")[0]
     logging.basicConfig(filename="".join([log_folder, '/log/update_', fn, '.log']), level=logging.DEBUG)
@@ -264,14 +265,27 @@ def is_file_checked_out(filename):
         bool: True if the rename operation fails, implying that it's checked out
     
     """
+    just_name = filename.split('.')[0]
     try: 
-        os.rename(filename, 'tempfile.xlsx')
-        sleep(1)
-        os.rename('tempfile.xlsx', filename)
-        return False
+        os.rename(filename, just_name+filename)
     except OSError:
         logging.critical("{}:".format(time()) + filename + ' is still open. Has not been refreshed.')
-        return True
+        return True    
+   
+    sleep(3)
+    try:
+        os.rename(just_name+filename, filename)
+        return False
+    except OSError:
+        logging.critical("{}:".format(time()) + filename + ' got locked out.  Will wait and try again.')
+        sleep(3)
+        try:
+            os.rename(just_name+filename, filename)
+            logging.debug("{}:".format(time()) + filename + ' unlocked.  Successfully reverted name.')
+            return False
+        except:
+            logging.critical("{}:".format(time()) + filename + ' is still locked out. Will need a manual rename')
+            return True
 
 #if __name__ == '__main__':
 #    fp = 'P:\\Update Zone\\Refresh Zone\\FL Workbooks'

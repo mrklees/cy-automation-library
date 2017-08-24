@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+"""Automated Section Creation
 Script for the automatic creation of sections in cyschoolhouse. Please ensure
 you have all dependencies, and have set up the input file called "section-creator-input.csv"
 """
