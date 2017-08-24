@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""
-This 'suite' is a set of helper functions which address the broader task of 
-accessing data on cyschoolhouse. This will include navigation functions, and 
-other useful things.  This file will be imported to the scripts that will actually
-perform different actions like create a section.
+"""cyschoolhouse Suite
+This suite is a set of helper functions which address the broader task of 
+accessing data on cyschoolhouse. This will include navigation functions, logins,
+and other common tasks we can antipicate needing to do for multiple products. 
 """
 
+from pathlib import Path
 import getpass
 from seleniumrequests import Firefox
 from selenium.webdriver.common.keys import Keys
@@ -13,10 +13,28 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# Extract my username and password from a local file.  Makes sure I don't upload
-# the username and password to GitHub. 
+"""Configuration Variables
+
+The below variables are used to configure some machine specific details. Unfortunately
+I don't know how we can avoid needing some of these variables for the potentially
+arbitrary machine and file system we might get.  
+"""
+# Location of the file with my SSO username and password
+key_file_path = '/'.join([str(Path.home()), 'Desktop/keyfile.txt'])
+gecko_path = '/'.join([str(Path.home()), 'GitHub/cy-automation-library/geckodriver/geckodriver.exe'])
+
+
 def extract_key():
-    with open('C:/Users/perus/Desktop/keyfile.txt') as file:
+    """Extract SSO Information from keyfile
+    
+    One practice I use here is to store my SSO in a keyfile instead of either
+    entering it in the cmd prompt on each run or hardcoding it in the program. 
+    Keyfile should be formatted like so:
+        'descript:cityyear sso/user:aperusse/pass:p@ssw0rd'
+    Simply replace the username and password with your credentials and then save
+    it as keyfile.txt
+    """
+    with open(key_file_path) as file:
         keys = file.read()
     split_line = keys.split("/")
     entries = [item.split(":")[1] for item in split_line]
@@ -33,7 +51,7 @@ def request_key():
     return user, pwd
 
 def get_driver():
-    return Firefox()
+    return Firefox(executable_path=gecko_path)
 
 # Login to a form using the standard element names "username" and "password"
 def standard_login(driver):
@@ -53,6 +71,7 @@ def open_okta(driver):
     # Open Okta login
     driver.get("https://cityyear.okta.com")
     # Input login
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "username")))
     driver = standard_login(driver)
     # Wait for next page to load
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "app-link")))
@@ -78,3 +97,7 @@ def open_cyschoolhouse18_sb(driver):
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "tsidLabel")))
     assert 'salesforce' in driver.current_url
     return driver
+
+if __name__ == '__main__':
+    driver = get_driver()
+    driver = open_cyschoolhouse18_sb(driver)

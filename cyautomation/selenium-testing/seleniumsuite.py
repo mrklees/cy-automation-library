@@ -1,20 +1,35 @@
 # -*- coding: utf-8 -*-
-import time
-import csv
-import os
-from contextlib import closing
+"""Selenium Suite
+
+The purpose of this file is provide wrappers for many of the common tasks performed
+with Selenium.  Increases the reusability of the code and lets me spread out some of
+the code into different files.
+
+This code was largely for testing purposes.   
+"""
 
 from seleniumrequests import Firefox
-from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# Extract my username and password from a local file.  Makes sure I don't upload
-# the username and password to GitHub. 
+"""Configuration Variables
+
+The below variables are used to configure some machine specific details. Unfortunately
+I don't know how we can avoid needing some of these variables for the potentially
+arbitrary machine and file system we might get.  
+"""
+# Location of the file with my SSO username and password
+key_file_path = 'C:/Users/aperusse/Desktop/keyfile.txt'
+
 def extract_key():
-    with open('C:/Users/perus/Desktop/keyfile.txt') as file:
+    """Extract SSO Information from keyfile
+    
+    One practice I use here is to store my SSO in a keyfile instead of either
+    entering it in the cmd prompt on each run or hardcoding it in the program. 
+    """
+    with open(key_file_path) as file:
         keys = file.read()
     split_line = keys.split("/")
     entries = [item.split(":")[1] for item in split_line]
@@ -22,7 +37,7 @@ def extract_key():
     return user, pwd
 
 def get_driver():
-    return Firefox()
+    return Firefox(executable_path = 'C:/Users/aperusse/GitHub/cy-automation-library/geckodriver/geckodriver.exe')
 
 # Login to a form using the standard element names "username" and "password"
 def standard_login(driver):
