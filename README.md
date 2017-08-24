@@ -3,7 +3,7 @@
 Welcome!  This is a home for automation projects which are being developed by members of the City Year Python Community. A current primary focus is web automation.  Many tasks that are given to impact points involve needless amounts of repetitive activity on SalesForce or in other contexts.  Using tools like Selenium we can automate many of these tasks.  Our goal is to create wrappers which allows a user to pass in some parameters in the form of a csv, and have Selenium create sections, enroll students, and make focus list changes based on that. 
 
 ## Table of Contents
-    
+
     1. selenium-testing
        a. Contains a couple scripts used as a proof of concept of a few different features of 
        Selenium.  Currently there is a file, seleniumsuite, which contains some of the more general 
@@ -12,7 +12,8 @@ Welcome!  This is a home for automation projects which are being developed by me
        cyschoolhouse using Selenium. Second, the cysh-section-creation-testing script demonstrates 
        the creation of a single section using a csv input.
     2. cyschoolhouse
-       a. Contains scripts for automating actions in cyschoolhouse. In current development.
+       a. Contains scripts for automating actions in cyschoolhouse. Section creation is the main 
+       focus of development right now. After that student enrollment and indicator areas. 
     3. excel-updater
        a. A tool for updating Excel Workbooks. Can currently update excel workbooks, handle sheet protection and 
        hiding, and provides a structure for writing functions to update specific workbooks in a particular order.  
