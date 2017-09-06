@@ -5,3 +5,5 @@ selenium-testing/testfile.csv
 /batch-files/*
 *.bat
 geckodriver/geckodriver.exe
+cyautomation/cyschoolhouse/input_files/la-intervention-sections.xlsx
+cyautomation/cyschoolhouse/input_files/~$la-intervention-sections.xlsx
