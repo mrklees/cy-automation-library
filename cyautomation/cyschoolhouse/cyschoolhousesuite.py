@@ -85,7 +85,7 @@ def open_okta(driver):
     """Logs into Okta via the front door.
     """
     # Open Okta login
-    logging.debug(":".join([str(time()), "Opening Okta"]))
+    logging.info(":".join([str(time()), "Opening Okta"]))
     driver.get("https://cityyear.okta.com")
     # Input login
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "username")))
@@ -128,7 +128,7 @@ def configure_log(log_folder):
     of the name. 
     """
     timestamp = str(time()).split(".")[0]
-    logging.basicConfig(filename="".join([log_folder, '/log/update_', timestamp, '.log']), level=logging.DEBUG)
+    logging.basicConfig(filename="".join([log_folder, '/log/update_', timestamp, '.log']), level=logging.INFO)
 
 #if __name__ == '__main__':
 #    driver = get_driver()
