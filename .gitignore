@@ -5,9 +5,5 @@ selenium-testing/testfile.csv
 /batch-files/*
 *.bat
 geckodriver/geckodriver.exe
-cyautomation/cyschoolhouse/input_files/la-intervention-sections.xlsx
-cyautomation/cyschoolhouse/input_files/~$la-intervention-sections.xlsx
-cyautomation/cyschoolhouse/input_files/section-creator-input.xlsx
-cyautomation/cyschoolhouse/input_files/section-creator-input.xlsx
-cyautomation/cyschoolhouse/input_files/created_sections.csv
-cyautomation/cyschoolhouse/.ipynb_checkpoints/section_creation-checkpoint.py
+cyautomation/cyschoolhouse/input_files/*
+cyautomation/cyschoolhouse/.ipynb_checkpoints/*
