@@ -60,7 +60,7 @@ def request_key():
 def get_driver():
     """Get Firefox driver
     
-    Returns the Firefox driver object and handles the path. 
+    Returns# the Firefox driver object and handles the path. 
     """
     configure_log(log_path)
     return Firefox(executable_path=gecko_path)
