@@ -77,7 +77,7 @@ def save_section(driver):
     sleep(2)
 
 def update_nickname(driver, nickname):
-    if nickname.isnull:
+    if nickname != '':
         driver.find_element_by_css_selector('#topButtonRow > input:nth-child(3)').click()
         sleep(2)
         driver.find_element_by_id("00N1a000006Syte").send_keys(nickname)
@@ -87,7 +87,7 @@ def update_nickname(driver, nickname):
 def create_single_section(driver, parameter):
     nav_to_section_creation_form(driver)
     select_school(driver, parameter['School'])
-    sleep(2)
+    sleep(2.5)
     select_subject(driver, parameter['SectionName'])
     sleep(2)
     input_staff_name(driver, parameter['ACM'])
