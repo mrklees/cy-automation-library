@@ -15,6 +15,10 @@ def import_parameters():
     """Import configuration data from Excel.
     """
     data = pd.read_excel('input_files/section-creator-input.xlsx')
+    data['Start_Date'] = data['Start_Date'].dt.strftime('%m/%d/%Y')
+    data['End_Date'] = data['End_Date'].dt.strftime('%m/%d/%Y')
+    data.fillna('', inplace=True)
+    data.replace('NaT', '', inplace=True)
     return data.to_dict(orient='records')
 
 def nav_to_section_creation_form(driver):
@@ -32,21 +36,21 @@ def input_staff_name(driver, staff_name):
     dropdown = Select(driver.find_element_by_id("j_id0:j_id1:staffID"))
     dropdown.select_by_visible_text(staff_name)
 
-def fill_static_elements(driver):
+def fill_static_elements(driver, insch_extlrn, start_date, end_date):
     """Fills in the static fields in the section creation form
     
     Includes the start/end dat, days of week, if time is in or out of school,
     and the estimated amount of time for that section.
     """
-    driver.find_element_by_id("j_id0:j_id1:startDateID").send_keys("08/14/2017")
-    driver.find_element_by_id("j_id0:j_id1:endDateID").send_keys("06/15/2018")
+    driver.find_element_by_id("j_id0:j_id1:startDateID").send_keys(start_date)
+    driver.find_element_by_id("j_id0:j_id1:endDateID").send_keys(end_date)
     driver.find_element_by_id("j_id0:j_id1:freqID:1").click()
     driver.find_element_by_id("j_id0:j_id1:freqID:2").click()
     driver.find_element_by_id("j_id0:j_id1:freqID:3").click()
     driver.find_element_by_id("j_id0:j_id1:freqID:4").click()
     driver.find_element_by_id("j_id0:j_id1:freqID:5").click()
     dropdown = Select(driver.find_element_by_id("j_id0:j_id1:inAfterID"))
-    dropdown.select_by_visible_text("In School")
+    dropdown.select_by_visible_text(insch_extlrn)
     driver.find_element_by_id("j_id0:j_id1:totalDosageID").send_keys("900")
     sleep(2)
 
@@ -73,21 +77,22 @@ def save_section(driver):
     sleep(2)
 
 def update_nickname(driver, nickname):
-    driver.find_element_by_css_selector('#topButtonRow > input:nth-child(3)').click()
-    sleep(2)
-    driver.find_element_by_id("00N1a000006Syte").send_keys(nickname)
-    driver.find_element_by_xpath("//input[@value=' Save ']").click()
-    sleep(2)
+    if nickname != '':
+        driver.find_element_by_css_selector('#topButtonRow > input:nth-child(3)').click()
+        sleep(2)
+        driver.find_element_by_id("00N1a000006Syte").send_keys(nickname)
+        driver.find_element_by_xpath("//input[@value=' Save ']").click()
+        sleep(2)
 
 def create_single_section(driver, parameter):
     nav_to_section_creation_form(driver)
     select_school(driver, parameter['School'])
-    sleep(2)
+    sleep(2.5)
     select_subject(driver, parameter['SectionName'])
     sleep(2)
     input_staff_name(driver, parameter['ACM'])
     sleep(2)
-    fill_static_elements(driver)
+    fill_static_elements(driver, parameter['In_School_or_Extended_Learning'], parameter['Start_Date'], parameter['End_Date'])
     save_section(driver)
     logging.info("Created {} section for {}".format(parameter['SectionName'], parameter['ACM']))
     update_nickname(driver, parameter['Nickname'])
