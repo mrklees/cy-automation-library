@@ -23,8 +23,8 @@ arbitrary machine and file system we might get.
 """
 # Location of the file with my SSO username and password
 key_file_path = '/'.join([str(Path.home()), 'Desktop/keyfile.txt'])
-gecko_path = '/'.join([str(Path.home()), 'GitHub/cy-automation-library/geckodriver/geckodriver.exe'])
-log_path = '/'.join([str(Path.home()), 'GitHub/cy-automation-library/cyautomation/cyschoolhouse'])
+gecko_path = '/'.join([str(Path.home()), 'OneDrive/Documents/GitHub/cy-automation-library/geckodriver/geckodriver.exe'])
+log_path = '/'.join([str(Path.home()), 'OneDrive/Documents/GitHub/cy-automation-library/cyautomation/cyschoolhouse'])
 
 def extract_key():
     """Extract SSO Information from keyfile
