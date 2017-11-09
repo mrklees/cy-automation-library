@@ -43,20 +43,40 @@ class OktaLogin(BaseImplementation):
     def set_up(self):
         self.driver.get("https://cityyear.okta.com")
         
-    def login(self, username, password):
+    def enter_credentials(self, username, password):
         login_page = page.OktaLoginPage(self.driver)
-        assert login_page.is_login_page()
+        assert login_page.page_is_loaded()
         login_page.username = username
         login_page.password = password
         login_page.click_login_button()
     
     def check_logged_in(self):
         homepage = page.OktaHomePage(self.driver)
-        assert homepage.is_logged_in()
+        assert homepage.page_is_loaded()
         
-    def full_login(self):
+    def login(self):
         """Runs all steps to login to Okta"""
         self.set_up()
-        self.login(self.user, self.pwd)
+        self.enter_credentials(self.user, self.pwd)
         self.check_logged_in()
-        return self.driver
+    
+class SectionEnrollment(OktaLogin):
+    """Implementation script for Section Enrollment"""
+    from pandas import read_excel
+    
+    data = read_excel('input_files/student-enrollment-records.xlsx')
+    
+    def launch_cyschoolhouse(self):
+        # Login via okta
+        self.login()
+        # Nav from Okta home to cyschoolhouse
+        Okta = page.OktaHomePage(self.driver)
+        assert Okta.page_is_loaded()
+        Okta.launch_cyschoolhouse()
+        
+    def search_for_a_section(self, section):
+        cysh_home = page.CyshHomePage(self.driver)
+        assert cysh_home.page_is_loaded()
+        cysh_home.set_search_filter("Sections")
+        cysh_home.search_bar = section
+        cysh_home.click_search_button()

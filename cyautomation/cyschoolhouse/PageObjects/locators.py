@@ -7,3 +7,9 @@ class OktaLoginPageLocators(object):
     GO_BUTTON = (By.ID, 'okta-signin-submit')
     USERNAME = (By.ID, 'okta-signin-username')
     PASSWORD = (By.ID, 'okta-signin-password')
+    
+class CyshHomePageLocators(object):
+    """The cyschoohouse homepage locators"""
+    SEARCH_FILTER = (By.ID, 'sen')
+    SEARCH_BOX = (By.ID, 'sbstr')
+    SEACH_BUTTON = (By.NAME, "search")

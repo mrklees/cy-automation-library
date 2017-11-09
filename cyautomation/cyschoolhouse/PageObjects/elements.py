@@ -27,3 +27,6 @@ class OktaUsernameElement(BasePageElement):
 class OktaPasswordElement(BasePageElement):
     """This class contains the locator for the username box"""
     locator = loc.OktaLoginPageLocators.PASSWORD
+    
+class CyshSearchElement(BasePageElement):
+    locator = loc.CyshHomePageLocators.SEARCH_BOX
