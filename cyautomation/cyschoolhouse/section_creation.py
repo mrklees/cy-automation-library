@@ -50,7 +50,7 @@ def fill_static_elements(driver, insch_extlrn, start_date, end_date, target_dosa
     driver.find_element_by_id("j_id0:j_id1:freqID:5").click()
     dropdown = Select(driver.find_element_by_id("j_id0:j_id1:inAfterID"))
     dropdown.select_by_visible_text(insch_extlrn)
-    driver.find_element_by_id("j_id0:j_id1:totalDosageID").send_keys(target_dosage)
+    driver.find_element_by_id("j_id0:j_id1:totalDosageID").send_keys(str(target_dosage))
 
 def select_school(driver, school):
     """ Selects the school name from section creation form
