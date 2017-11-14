@@ -27,8 +27,7 @@ def nav_to_section_creation_form(driver):
     Must already be logged into SalesForce
     """
     driver.get('https://na24.salesforce.com/a1A/o')
-    driver.find_element_by_name("new").click()
-    sleep(2)
+    driver.find_element_by_name("new").click()    
 
 def input_staff_name(driver, staff_name):
     """Selects the staff name from the drop down
@@ -36,7 +35,7 @@ def input_staff_name(driver, staff_name):
     dropdown = Select(driver.find_element_by_id("j_id0:j_id1:staffID"))
     dropdown.select_by_visible_text(staff_name)
 
-def fill_static_elements(driver, insch_extlrn, start_date, end_date):
+def fill_static_elements(driver, insch_extlrn, start_date, end_date, target_dosage):
     """Fills in the static fields in the section creation form
     
     Includes the start/end dat, days of week, if time is in or out of school,
@@ -51,12 +50,12 @@ def fill_static_elements(driver, insch_extlrn, start_date, end_date):
     driver.find_element_by_id("j_id0:j_id1:freqID:5").click()
     dropdown = Select(driver.find_element_by_id("j_id0:j_id1:inAfterID"))
     dropdown.select_by_visible_text(insch_extlrn)
-    driver.find_element_by_id("j_id0:j_id1:totalDosageID").send_keys("900")
-    sleep(2)
+    driver.find_element_by_id("j_id0:j_id1:totalDosageID").send_keys(target_dosage)
 
 def select_school(driver, school):
     """ Selects the school name from section creation form
     """
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "j_id0:j_id1:school-selector")))
     dropdown = Select(driver.find_element_by_id("j_id0:j_id1:school-selector"))
     dropdown.select_by_visible_text(school)
 
@@ -65,7 +64,7 @@ def select_subject(driver, section_name):
     """
     try:
         driver.find_element_by_xpath("//label[contains(text(), '"+ section_name +"')]").click()
-        sleep(2)
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//input[@value='Proceed']")))
         driver.find_element_by_xpath("//input[@value='Proceed']").click()
     except:
         print("Hopefully it's okay")
@@ -74,31 +73,31 @@ def save_section(driver):
     """ Saves the section
     """
     driver.find_element_by_css_selector('input.black_btn:nth-child(2)').click()
-    sleep(2)
-
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, 
+                                                                    '/html/body/div[1]/div[3]/table/tbody/tr/td[2]/div[4]/div[1]/table/tbody/tr/td[2]/input[5]')))
+    
 def update_nickname(driver, nickname):
-    if nickname != '':
-        driver.find_element_by_css_selector('#topButtonRow > input:nth-child(3)').click()
-        sleep(2)
-        driver.find_element_by_id("00N1a000006Syte").send_keys(nickname)
-        driver.find_element_by_xpath("//input[@value=' Save ']").click()
-        sleep(2)
+    driver.find_element_by_css_selector('#topButtonRow > input:nth-child(3)').click()
+    sleep(2)
+    driver.find_element_by_id("00N1a000006Syte").send_keys(nickname)
+    driver.find_element_by_xpath("//input[@value=' Save ']").click()
+    sleep(2)
 
 def create_single_section(driver, parameter):
     nav_to_section_creation_form(driver)
     select_school(driver, parameter['School'])
-    sleep(2.5)
+    sleep(2)
     select_subject(driver, parameter['SectionName'])
-    sleep(2)
+    sleep(2.5)
     input_staff_name(driver, parameter['ACM'])
-    sleep(2)
-    fill_static_elements(driver, parameter['In_School_or_Extended_Learning'], parameter['Start_Date'], parameter['End_Date'])
+    fill_static_elements(driver, parameter['In_School_or_Extended_Learning'], parameter['Start_Date'], parameter['End_Date'], parameter['Target_Dosage'])
+    sleep(1)
     save_section(driver)
     logging.info("Created {} section for {}".format(parameter['SectionName'], parameter['ACM']))
-    update_nickname(driver, parameter['Nickname'])
+    if parameter['Nickname'] != "":
+        update_nickname(driver, parameter['Nickname'])
     
-    
-        
+
 # runs the entire script
 def section_creation():
     params = import_parameters()
@@ -113,7 +112,6 @@ def section_creation():
             driver.quit()
             driver = cysh.get_driver()
             cysh.open_cyschoolhouse18(driver)
-            driver.find_element_by_xpath("//input[@value='Proceed']").click()
             continue
     driver.quit()
     
