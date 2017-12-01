@@ -88,10 +88,10 @@ def open_okta(driver):
     logging.info(":".join([str(time()), "Opening Okta"]))
     driver.get("https://cityyear.okta.com")
     # Input login
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "username")))
+    WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.NAME, "username")))
     driver = standard_login(driver)
     # Wait for next page to load
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "app-link")))
+    WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.NAME, "app-link")))
     # Check that we aren't in the login page anymore
     assert 'login' not in driver.current_url
     return driver
