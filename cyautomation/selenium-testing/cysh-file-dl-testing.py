@@ -52,12 +52,33 @@ def download_testfile_post(driver):
             writer.writerow(row)
     return driver
 
+def mydata_test_file_dl():
+    url = 'https://getdata.lausd.net/analytics/saw.dll?Go'
+    payload = {
+            'ViewID':	'd:dashboard~p:hjhb6de9d3o9vir4~r:90s2c3lbg3bm6j19',
+            'Action':	'Download',
+            'SearchID':	'254l96i4ia7g1uraipg59rglra',
+            'Style':	'Alta',
+            'PortalPath': 	'/shared/MyData/_portal/School/Attendance',
+            'Page':	'Truancy',
+            'ViewState':	'lfqeqh733mee96kre1jrckco32',
+            'ItemName':	'AGG14DS.1',
+            'path':	'/shared/MyData/Aggregate+Repor…eports/AGG14/AGG14D/AGG14DS.1',
+            'Format':	'csv',
+            'Extension':	'.csv',
+            'bNotSaveCommand':	'true',
+            'DownloadId':	'1512171713280',
+            'clientStateXml':	'<sawst:envState+xmlns:sawst="c…t:container></sawst:envState>',
+            '_scid':	'groXSzrRJ1IreEDRHL9D'
+            }
+
+        
+
 # runs the entire test script
 def selenium_test_file_dl():
     driver = get_driver()
     driver = open_cyschoolhouse17(driver)
-    driver = download_testfile_post(driver)
-    driver.quit()
+    drivedriver = get_driver()
     
 if __name__ == "__main__":
-    selenium_test_file_dl()
+    driver = get_driver()

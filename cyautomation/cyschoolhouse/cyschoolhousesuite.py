@@ -63,7 +63,7 @@ def get_driver():
     Returns# the Firefox driver object and handles the path. 
     """
     configure_log(log_path)
-    return Firefox(executable_path=gecko_path)
+    return Firefox()
 
 def standard_login(driver):
     """# Login to a form using the standard element names "username" and "password"
