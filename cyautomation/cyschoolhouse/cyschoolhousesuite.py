@@ -100,7 +100,7 @@ def open_cyschoolhouse18(driver):
     """Opens the 2018 cyschoolhouse instance
     
     """
-    driver.implicitly_wait(10)
+    #driver.implicitly_wait(10)
     driver = open_okta(driver)
     driver.get("https://cityyear.okta.com/home/salesforce/0oao08nxmQCYJQHUHCBU/46?fromHome=true")
     # Wait for next page to load

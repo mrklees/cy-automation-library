@@ -35,15 +35,20 @@ class BaseImplementation(object):
         else:
             self.driver = driver
 
-class OktaLogin(BaseImplementation):
-    """Implementation script for logging into Okta."""
+class Okta(BaseImplementation):
+    """Object for handingling Okta
+    
+    Wraps all processes for logging into Okta and navigation.
+    """
     
     user, pwd = extract_key()
     
     def set_up(self):
+        """Navigate to City Year Okta login"""
         self.driver.get("https://cityyear.okta.com")
         
     def enter_credentials(self, username, password):
+        """Enter credentials for Okta Login"""
         login_page = page.OktaLoginPage(self.driver)
         assert login_page.page_is_loaded()
         login_page.username = username
@@ -51,6 +56,7 @@ class OktaLogin(BaseImplementation):
         login_page.click_login_button()
     
     def check_logged_in(self):
+        """Confirm login"""
         homepage = page.OktaHomePage(self.driver)
         assert homepage.page_is_loaded()
         
@@ -59,24 +65,35 @@ class OktaLogin(BaseImplementation):
         self.set_up()
         self.enter_credentials(self.user, self.pwd)
         self.check_logged_in()
-    
-class SectionEnrollment(OktaLogin):
-    """Implementation script for Section Enrollment"""
-    from pandas import read_excel
-    
-    data = read_excel('input_files/student-enrollment-records.xlsx')
-    
+        
     def launch_cyschoolhouse(self):
+        """Script for logging into Okta and cyschoolhouse"""
         # Login via okta
         self.login()
         # Nav from Okta home to cyschoolhouse
         Okta = page.OktaHomePage(self.driver)
         assert Okta.page_is_loaded()
         Okta.launch_cyschoolhouse()
-        
+
+class SectionEnrollment(Okta):
+    """Implementation script for Section Enrollment"""
+    from pandas import read_excel
+    
+    data = read_excel('input_files/student-enrollment-records.xlsx')
+    
     def search_for_a_section(self, section):
+        """Should only be used from the cyschoohouse homepage"""
         cysh_home = page.CyshHomePage(self.driver)
         assert cysh_home.page_is_loaded()
         cysh_home.set_search_filter("Sections")
         cysh_home.search_bar = section
         cysh_home.click_search_button()
+        
+class IndicatorAreaEnrollment(Okta):
+    """Implementation object for Indicator Area Enrollment"""
+    from pandas import read_excel
+    
+    data = read_excel('input_files/indiactor_area_roster.xlsx')
+    
+    def 
+    

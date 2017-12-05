@@ -60,3 +60,8 @@ class CyshHomePage(BasePage):
     def click_search_button(self):
         button = self.driver.find_element(*loc.CyshHomePageLocators.SEACH_BUTTON)
         button.click()
+        
+class CyshIndicatorAreas(BasePage):
+    
+    def nav_to_IA_enroller(self):
+        self.driver.get("https://c.na24.visual.force.com/apex/IM_Indicator_Areas")
