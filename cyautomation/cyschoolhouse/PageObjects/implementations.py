@@ -2,6 +2,9 @@
 
 from pathlib import Path
 from seleniumrequests import Firefox
+from selenium.common.exceptions import TimeoutException, StaleElementReferenceException
+from time import sleep
+import sys
 
 import PageObjects.pages as page
 
@@ -94,6 +97,67 @@ class IndicatorAreaEnrollment(Okta):
     from pandas import read_excel
     
     data = read_excel('input_files/indiactor_area_roster.xlsx')
+    student_list = data['Student: Student ID'].unique()
     
-    def 
+    def nav_to_form(self):
+        """Initial setup script for IA enrollment.
+        
+        Goes through login for Okta as well as navigating to the form and 
+        ensuring the page is loaded appropriately
+        """
+        self.launch_cyschoolhouse()
+        cysh_home = page.CyshHomePage(self.driver)
+        assert cysh_home.page_is_loaded()
+        
+        self.driver.get("https://c.na24.visual.force.com/apex/IM_Indicator_Areas")
+        ia_form = page.CyshIndicatorAreas(self.driver)
+        ia_form.wait_for_page_to_load()
     
+    def get_student_details(self, student_id):
+        """Returns a students details including school, grade, name, and ia list given their id"""
+        student_records = self.data[self.data['Student: Student ID'] == student_id]
+        school = student_records.School.unique()[0]
+        grade = student_records['Student: Grade'].unique()[0]
+        name = student_records['Student: Student Last Name'].unique()[0]
+        ia_list = student_records['Indicator Area'].values
+        return school, grade, name, ia_list
+    
+    def enroll_student(self, student_id):
+        """Handles the enrollment process of all IAs for a single student"""
+        ia_form = page.CyshIndicatorAreas(self.driver)
+        ia_form.wait_for_page_to_load()
+        school, grade, name, ia_list = self.get_student_details(student_id)
+        ia_form.select_school(school)
+        sleep(1)
+        ia_form.select_grade(str(grade))
+        sleep(1)
+        for ia in ia_list:
+            ia_form.name_search = name
+            sleep(2)
+            self.assign_ias(student_id, ia)
+            sleep(2)
+        ia_form.save()
+    
+    def assign_ias(self, student_id, ia):
+        """Assign an IA for a single student and indicator"""
+        ia_form = page.CyshIndicatorAreas(self.driver)
+        ia_form.wait_for_page_to_load()
+        ia_form.select_student(student_id)
+        sleep(2)
+        ia_form.assign_indicator_area(ia)
+        
+    def enroll_all_students(self):
+        """Executes the full IA enrollment"""
+        self.nav_to_form()
+        for student_id in self.student_list:
+            try:
+                self.enroll_student(student_id)
+            except TimeoutException:
+                print("Timeout Failure on student: {}".format(student_id))
+                
+            except StaleElementReferenceException:
+                print("Stale Element failure on student: {}".format(student_id))
+                
+            except:
+                print("Caught a {} error on student: {}".format(sys.exc_info(), student_id))
+                

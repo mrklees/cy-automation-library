@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from time import sleep
+
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.common.by import By
@@ -63,5 +65,44 @@ class CyshHomePage(BasePage):
         
 class CyshIndicatorAreas(BasePage):
     
-    def nav_to_IA_enroller(self):
-        self.driver.get("https://c.na24.visual.force.com/apex/IM_Indicator_Areas")
+    name_search = elem.IaNameSearch()
+    
+    def wait_for_page_to_load(self):
+        WebDriverWait(self.driver, 100)\
+            .until(EC.presence_of_all_elements_located(loc.IndicatorAreaLocators.PAGE_TITLE))
+      
+    def select_school(self, school_name):
+        """Updates the school selector to the given school name"""
+        WebDriverWait(self.driver, 100).until(EC.element_to_be_clickable(loc.IndicatorAreaLocators.SCHOOL_SELECT))
+        selector = Select(self.driver.find_element(*loc.IndicatorAreaLocators.SCHOOL_SELECT))
+        selector.select_by_visible_text(school_name)
+        
+    def select_grade(self, grade):
+        """Updates the school selector to the given school name"""
+        WebDriverWait(self.driver, 100).until(EC.element_to_be_clickable(loc.IndicatorAreaLocators.GRADE_SELECT))
+        selector = Select(self.driver.find_element(*loc.IndicatorAreaLocators.GRADE_SELECT))
+        selector.select_by_visible_text(grade)
+    
+    def select_student(self, student_id):
+        """Selects a visible student using their Salesforce Id"""
+        WebDriverWait(self.driver, 100).until(EC.presence_of_all_elements_located((By.XPATH, "//table[@id='StudentsTable']")))
+        table = self.driver.find_element_by_xpath("//table[@id='StudentsTable']/tbody")
+        student = table.find_element_by_xpath("//tr[starts-with(@id, '" + student_id + "')]")
+        student.click()
+        self.driver.find_element(*loc.IndicatorAreaLocators.ADD_BUTTON).click()
+        
+    def assign_indicator_area(self, ia):
+        ia_dict = {
+                'Attendance' : loc.IndicatorAreaLocators.ATTENDANCE,
+                'Behavior' : loc.IndicatorAreaLocators.BEHAVIOR,
+                'ELA/Literacy' : loc.IndicatorAreaLocators.ELA,
+                'Math' : loc.IndicatorAreaLocators.MATH
+                }
+        WebDriverWait(self.driver, 100).until(EC.element_to_be_clickable(ia_dict[ia]))
+        self.driver.find_element(*ia_dict[ia]).click()
+        self.driver.find_element(*loc.IndicatorAreaLocators.ADD_INDICATOR).click()
+        
+    def save(self):
+        WebDriverWait(self.driver, 100).until(EC.element_to_be_clickable(loc.IndicatorAreaLocators.SAVE))
+        self.driver.find_element(*loc.IndicatorAreaLocators.SAVE).click()
+        sleep(3)

@@ -30,3 +30,6 @@ class OktaPasswordElement(BasePageElement):
     
 class CyshSearchElement(BasePageElement):
     locator = loc.CyshHomePageLocators.SEARCH_BOX
+    
+class IaNameSearch(BasePageElement):
+    locator = loc.IndicatorAreaLocators.NAME_SEARCH
