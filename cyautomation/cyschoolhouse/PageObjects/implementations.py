@@ -133,7 +133,7 @@ class IndicatorAreaEnrollment(Okta):
         sleep(1)
         for ia in ia_list:
             ia_form.name_search = name
-            sleep(2)
+            sleep(3)
             self.assign_ias(student_id, ia)
             sleep(2)
         ia_form.save()
@@ -143,21 +143,30 @@ class IndicatorAreaEnrollment(Okta):
         ia_form = page.CyshIndicatorAreas(self.driver)
         ia_form.wait_for_page_to_load()
         ia_form.select_student(student_id)
-        sleep(2)
+        sleep(3)
         ia_form.assign_indicator_area(ia)
         
     def enroll_all_students(self):
         """Executes the full IA enrollment"""
         self.nav_to_form()
+        self.error_count = 0
         for student_id in self.student_list:
+            if self.error_count == 5:
+                self.error_count = 0
+                self.driver.quit()
+                self.driver = Firefox()
+                self.nav_to_form()
+                
             try:
                 self.enroll_student(student_id)
             except TimeoutException:
                 print("Timeout Failure on student: {}".format(student_id))
+                self.error_count += 1
                 
             except StaleElementReferenceException:
                 print("Stale Element failure on student: {}".format(student_id))
+                self.error_count += 1
                 
             except:
                 print("Caught a {} error on student: {}".format(sys.exc_info(), student_id))
-                
+                self.error_count += 1
