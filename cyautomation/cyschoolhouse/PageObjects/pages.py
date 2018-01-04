@@ -84,10 +84,16 @@ class CyshIndicatorAreas(BasePage):
         selector.select_by_visible_text(grade)
     
     def select_student(self, student_id):
-        """Selects a visible student using their Salesforce Id"""
+        """Selects a visible student using their Salesforce Id
+        
+        These selectors were pretty annoying.  Originally I used XPATH to select the appropriate 
+        row, but the resulting student object wouldn't register the clicks.  I fixed the problem
+        by switching to css selectors and selecting the first cell of the chosen row instead of selecting
+        the row itself.
+        """
         WebDriverWait(self.driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, "//table[@id='StudentsTable']")))
-        table = self.driver.find_element_by_xpath("//table[@id='StudentsTable']/tbody")
-        student = table.find_element_by_xpath("//tr[starts-with(@id, '" + student_id + "')]")
+        table = self.driver.find_element_by_css_selector("Table[id*='StudentsTable'] tbody")
+        student = table.find_element_by_css_selector("tr[id ^= '" + student_id + "'] td")
         student.click()
         self.driver.find_element(*loc.IndicatorAreaLocators.ADD_BUTTON).click()
         
