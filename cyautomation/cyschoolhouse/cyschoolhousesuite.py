@@ -6,7 +6,7 @@ and other common tasks we can antipicate needing to do for multiple products.
 """
 
 from pathlib import Path
-from time import time
+from time import time, sleep
 import getpass
 import logging
 from seleniumrequests import Firefox
@@ -15,6 +15,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
+import pandas as pd
+import io
+
 """Configuration Variables
 
 The below variables are used to configure some machine specific details. Unfortunately
@@ -22,9 +26,11 @@ I don't know how we can avoid needing some of these variables for the potentiall
 arbitrary machine and file system we might get.  
 """
 # Location of the file with my SSO username and password
-key_file_path = '/'.join([str(Path.home()), 'Desktop/keyfile.txt'])
-gecko_path = '/'.join([str(Path.home()), 'OneDrive/Documents/GitHub/cy-automation-library/geckodriver/geckodriver.exe'])
-log_path = '/'.join([str(Path.home()), 'OneDrive/Documents/GitHub/cy-automation-library/cyautomation/cyschoolhouse'])
+key_file_path = str(Path.home() / 'Desktop/keyfile.txt')
+gecko_path = str(Path.cwd().parents[1] / 'geckodriver/geckodriver.exe')
+log_path = str(Path.cwd().parents[1] / 'cyautomation/cyschoolhouse/log')
+temp_path = str(Path.cwd().parents[1] / 'cyautomation/cyschoolhouse/temp')
+templates_path =str(Path.cwd().parents[1] / 'cyautomation/cyschoolhouse/templates')
 
 def extract_key():
     """Extract SSO Information from keyfile
@@ -63,7 +69,13 @@ def get_driver():
     Returns# the Firefox driver object and handles the path. 
     """
     configure_log(log_path)
-    return Firefox()
+    
+    profile = FirefoxProfile()
+    profile.set_preference('browser.download.folderList', 2)
+    profile.set_preference('browser.download.manager.showWhenStarting', False)
+    profile.set_preference('browser.download.dir', temp_path)
+    profile.set_preference('browser.helperApps.neverAsk.saveToDisk', ('application/csv,text/csv,application/vnd.ms-excel,application/x-msexcel,application/excel,application/x-excel,text/comma-separated-values'))
+    return Firefox(firefox_profile=profile, executable_path=gecko_path)
 
 def standard_login(driver):
     """# Login to a form using the standard element names "username" and "password"
@@ -128,8 +140,25 @@ def configure_log(log_folder):
     of the name. 
     """
     timestamp = str(time()).split(".")[0]
-    logging.basicConfig(filename="".join([log_folder, '/log/update_', timestamp, '.log']), level=logging.INFO)
+    logging.basicConfig(filename="".join([log_folder, '/update_', timestamp, '.log']), level=logging.INFO)
 
+def get_report(report_key):
+    driver = get_driver()
+    open_cyschoolhouse18(driver)
+    url = 'https://na24.salesforce.com/' + report_key + '?export=1&enc=UTF-8&xf=csv'
+    response = driver.request('GET', url)
+    df = pd.read_csv(io.StringIO(response.content.decode('utf-8')))
+    driver.quit()
+    return df
+
+def delete_folder(pth):
+    for sub in pth.iterdir():
+        if sub.is_dir():
+            delete_folder(sub)
+        else:
+            sub.unlink()
+    pth.rmdir()
+    
 #if __name__ == '__main__':
 #    driver = get_driver()
 #    driver = open_cyschoolhouse18_sb(driver)
