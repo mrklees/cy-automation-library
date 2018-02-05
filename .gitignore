@@ -4,6 +4,5 @@
 selenium-testing/testfile.csv
 /batch-files/*
 *.bat
-geckodriver/geckodriver.exe
 cyautomation/cyschoolhouse/input_files/*
 cyautomation/cyschoolhouse/.ipynb_checkpoints/*

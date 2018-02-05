@@ -37,7 +37,7 @@ def extract_key():
     return user, pwd
 
 def get_driver():
-    return Firefox(executable_path = 'C:/Users/aperusse/GitHub/cy-automation-library/geckodriver/geckodriver.exe')
+    return Firefox()
 
 # Login to a form using the standard element names "username" and "password"
 def standard_login(driver):

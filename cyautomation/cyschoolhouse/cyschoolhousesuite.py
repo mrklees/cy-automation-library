@@ -23,8 +23,8 @@ arbitrary machine and file system we might get.
 """
 # Location of the file with my SSO username and password
 key_file_path = '/'.join([str(Path.home()), 'Desktop/keyfile.txt'])
-gecko_path = '/'.join([str(Path.home()), 'GitHub/cy-automation-library/geckodriver/geckodriver.exe'])
-log_path = '/'.join([str(Path.home()), 'GitHub/cy-automation-library/cyautomation/cyschoolhouse'])
+gecko_path = '/'.join([str(Path.home()), 'OneDrive/Documents/GitHub/cy-automation-library/geckodriver/geckodriver.exe'])
+log_path = '/'.join([str(Path.home()), 'OneDrive/Documents/GitHub/cy-automation-library/cyautomation/cyschoolhouse'])
 
 def extract_key():
     """Extract SSO Information from keyfile
@@ -63,7 +63,7 @@ def get_driver():
     Returns# the Firefox driver object and handles the path. 
     """
     configure_log(log_path)
-    return Firefox(executable_path=gecko_path)
+    return Firefox()
 
 def standard_login(driver):
     """# Login to a form using the standard element names "username" and "password"
@@ -88,10 +88,10 @@ def open_okta(driver):
     logging.info(":".join([str(time()), "Opening Okta"]))
     driver.get("https://cityyear.okta.com")
     # Input login
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "username")))
+    WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.NAME, "username")))
     driver = standard_login(driver)
     # Wait for next page to load
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "app-link")))
+    WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.NAME, "app-link")))
     # Check that we aren't in the login page anymore
     assert 'login' not in driver.current_url
     return driver
@@ -100,7 +100,7 @@ def open_cyschoolhouse18(driver):
     """Opens the 2018 cyschoolhouse instance
     
     """
-    driver.implicitly_wait(10)
+    #driver.implicitly_wait(10)
     driver = open_okta(driver)
     driver.get("https://cityyear.okta.com/home/salesforce/0oao08nxmQCYJQHUHCBU/46?fromHome=true")
     # Wait for next page to load
