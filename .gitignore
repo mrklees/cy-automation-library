@@ -6,3 +6,4 @@ selenium-testing/testfile.csv
 *.bat
 cyautomation/cyschoolhouse/input_files/*
 cyautomation/cyschoolhouse/.ipynb_checkpoints/*
+cyautomation/cyschoolhouse/temp/*
