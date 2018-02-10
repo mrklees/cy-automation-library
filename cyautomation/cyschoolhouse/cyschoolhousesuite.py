@@ -159,6 +159,12 @@ def delete_folder(pth):
             sub.unlink()
     pth.rmdir()
     
+def fancy_box_wait(driver, waittime=10):
+    WebDriverWait(driver, waittime).until(EC.presence_of_element_located((By.XPATH, ".//div[contains(@id, 'fancybox-wrap')]")))
+    WebDriverWait(driver, (waittime+30)).until(EC.invisibility_of_element_located((By.XPATH, ".//div[contains(@id, 'fancybox-wrap')]")))
+    sleep(2)
+    return driver
+    
 #if __name__ == '__main__':
 #    driver = get_driver()
 #    driver = open_cyschoolhouse18_sb(driver)
