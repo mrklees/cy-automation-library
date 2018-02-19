@@ -1,5 +1,3 @@
-# coding: utf-8
-
 from cyschoolhousesuite import *
 from selenium.webdriver.support.ui import Select
 import pandas as pd
