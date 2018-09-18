@@ -3,12 +3,9 @@
 Script for the automatic creation of sections in cyschoolhouse. Please ensure
 you have all dependencies, and have set up the input file called "section-creator-input.csv"
 in the input files folder.
-
 """
-import pandas as pd
-import cyschoolhousesuite as cysh
+from cyschoolhousesuite import *
 from selenium.webdriver.support.ui import Select
-from time import sleep
 import logging
 
 def import_parameters():
@@ -26,8 +23,8 @@ def nav_to_section_creation_form(driver):
     
     Must already be logged into SalesForce
     """
-    driver.get('https://na24.salesforce.com/a1A/o')
-    driver.find_element_by_name("new").click()    
+    # Changed between SY18 and SY19
+    driver.get('https://na30.salesforce.com/a1v/e')  
 
 def input_staff_name(driver, staff_name):
     """Selects the staff name from the drop down
@@ -93,7 +90,7 @@ def create_single_section(driver, parameter):
     fill_static_elements(driver, parameter['In_School_or_Extended_Learning'], parameter['Start_Date'], parameter['End_Date'], parameter['Target_Dosage'])
     sleep(1)
     save_section(driver)
-    logging.info("Created {} section for {}".format(parameter['SectionName'], parameter['ACM']))
+    logging.info(f"Created {parameter['SectionName']} section for {parameter['ACM']}")
     if parameter['Nickname'] != "":
         update_nickname(driver, parameter['Nickname'])
     
@@ -101,17 +98,21 @@ def create_single_section(driver, parameter):
 # runs the entire script
 def section_creation():
     params = import_parameters()
-    driver = cysh.get_driver()
-    cysh.open_cyschoolhouse18(driver)
+    driver = get_driver()
+    open_cyschoolhouse19(driver)
     for p in params:
         try:
             create_single_section(driver, p)
         except:
-            print("Section creation failed for {}".format(p['ACM']))
-            logging.error("Section creation failed for {}".format(p['ACM']))
-            driver.quit()
-            driver = cysh.get_driver()
-            cysh.open_cyschoolhouse18(driver)
+            print(f"Section creation failed: {p['ACM']}, {p['SectionName']}")
+            logging.error(f"Section creation failed: {p['ACM']}, {p['SectionName']}")
+            driver.get('https://na30.salesforce.com/')
+            try:
+                WebDriverWait(driver, 3).until(EC.alert_is_present())
+                driver.switch_to.alert.accept()
+                sleep(2)
+            except TimeoutException:
+                print("No alert")
             continue
     driver.quit()
     

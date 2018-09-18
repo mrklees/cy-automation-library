@@ -108,20 +108,20 @@ def open_okta(driver):
     assert 'login' not in driver.current_url
     return driver
 
-def open_cyschoolhouse18(driver):
-    """Opens the 2018 cyschoolhouse instance
+def open_cyschoolhouse19(driver):
+    """Opens the 2019 cyschoolhouse instance
     
     """
     #driver.implicitly_wait(10)
     driver = open_okta(driver)
-    driver.get("https://cityyear.okta.com/home/salesforce/0oao08nxmQCYJQHUHCBU/46?fromHome=true")
+    driver.get("https://cityyear.okta.com/home/salesforce/0oa19u4wnhzgPqjtw0h8/46?fromHome=true")
     # Wait for next page to load
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "tsidLabel")))
     assert 'salesforce' in driver.current_url
     return driver
 
 def open_cyschoolhouse18_sb(driver):
-    """Opens the 208 cyschoolhouse sandbox instance
+    """Opens the 2018 cyschoolhouse sandbox instance
     
     """
     driver.implicitly_wait(10)
@@ -145,7 +145,7 @@ def configure_log(log_folder):
 def get_report(report_key):
     driver = get_driver()
     open_cyschoolhouse18(driver)
-    url = 'https://na24.salesforce.com/' + report_key + '?export=1&enc=UTF-8&xf=csv'
+    url = 'https://na30.salesforce.com/' + report_key + '?export=1&enc=UTF-8&xf=csv'
     response = driver.request('GET', url)
     df = pd.read_csv(io.StringIO(response.content.decode('utf-8')))
     driver.quit()
