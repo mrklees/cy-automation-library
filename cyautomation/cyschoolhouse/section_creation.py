@@ -59,8 +59,9 @@ def select_school(driver, school):
 def select_subject(driver, section_name):
     """ Selects the section type
     """
+    driver.find_element_by_xpath("//label[contains(text(), '"+ section_name +"')]").click()
+    
     try:
-        driver.find_element_by_xpath("//label[contains(text(), '"+ section_name +"')]").click()
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//input[@value='Proceed']")))
         driver.find_element_by_xpath("//input[@value='Proceed']").click()
     except:
@@ -91,9 +92,9 @@ def create_single_section(driver, parameter):
     sleep(1)
     save_section(driver)
     logging.info(f"Created {parameter['SectionName']} section for {parameter['ACM']}")
-    if parameter['Nickname'] != "":
-        update_nickname(driver, parameter['Nickname'])
-    
+    if 'Nickname' in parameter.keys():
+        if parameter['Nickname'] != "":
+            update_nickname(driver, parameter['Nickname'])
 
 # runs the entire script
 def section_creation():
