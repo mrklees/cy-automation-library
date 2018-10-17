@@ -147,6 +147,54 @@ def create_student_section(student__c, section__c, enrollment_start_date):
     
     return result
 
+def exit_student_section(student_section_id, exit_date, exit_reason):
+    """ 
+    exit_date in the format YYYY-MM-DD
+    exit_reason used in CHI: 'School Year ended'
+    """
+    result = {}
+    result['student_section_id'] = student_section_id
+    result['Active__c'] = cysh.Student_Section__c.update(student_section_id, {'Active__c':False})
+    result['Enrollment_End_Date__c'] = cysh.Student_Section__c.update(student_section_id, {'Enrollment_End_Date__c':exit_date})
+    result['Section_Exit_Reason__c'] = cysh.Student_Section__c.update(student_section_id, {'Section_Exit_Reason__c':exit_reason})
+    
+    return result
+
+def undo_exit_student_section(student_section_id):
+    result = {}
+    result['student_section_id'] = student_section_id
+    result['Active__c'] = cysh.Student_Section__c.update(student_section_id, {'Active__c':True})
+    result['Enrollment_End_Date__c'] = cysh.Student_Section__c.update(student_section_id, {'Enrollment_End_Date__c':None})
+    result['Section_Exit_Reason__c'] = cysh.Student_Section__c.update(student_section_id, {'Section_Exit_Reason__c':None})
+    
+    return result
+
+def exit_all_student_sections(exit_date, exit_reason):
+    """ 
+    exit_date in the format YYYY-MM-DD
+    exit_reason used: 'School Year ended'
+    """
+    # load student/sections object from salesforce
+    student_sections_df = get_cysh_df('Student_Section__c',
+                                      ['Id', 'Student__c', 'Section__c', 'Active__c', 'Enrollment_End_Date__c'],
+                                      where = "Active__c = True")
+
+    n_exits = len(student_sections_df)
+    print(f"{n_exits} student/sections to exit")
+
+    # exit student sections
+    results = []
+    for index, row in student_sections_df.iterrows(): 
+        if index % 100 == 0:
+            print(f"{round((index+1)/n_exits*100)}% complete")
+
+        result = exit_student_section(student_section_id=row['Id'],
+                                      exit_date=exit_date, 
+                                      exit_reason=exit_reason)
+
+        results.append(result)
+    
+    return results
 
 cysh_object_reference = [
     'Name',
