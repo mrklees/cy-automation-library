@@ -4,6 +4,30 @@ from simple_cysh import *
 from time import sleep
 import numpy as np
 
+## This is how the task would be accomplished via salesforce API, if only I could edit the fields:
+#
+# df = pd.read_excel(r'C:\Users\City_Year\Downloads\New Students for cyschoolhouse(1-11).xlsx')
+# school_df = get_cysh_df('Account', ['Id', 'Name'])
+# df = df.merge(school_df, how='left', left_on='School', right_on='Name')
+# 
+# drop_ids = []
+# for index, row in df.iterrows():
+#     search_result = cysh.query(f"SELECT Id FROM Student__c WHERE Local_Student_ID__c = '{row['Student CPS ID']}'")
+#     if len(search_result['records']) > 0:
+#         drop_ids.append(row['Student CPS ID'])
+# df = df.loc[~df['Student CPS ID'].isin(drop_ids)]
+# 
+# for index, row in df.iterrows():
+#     stu_dict = {
+#         'Local_Student_ID__c':str(row['Student CPS ID']),
+#         'School__c':row['Id'],
+#         'Name':(row['Student First Name'] + ' ' + row['Student Last Name']),
+#         'Student_Last_Name__c':row['Student Last Name'],
+#         'Grade__c':str(row['Student Grade Level']), 
+#         #'School_Name__c':row['Name_y'],
+#     }
+
+
 def import_parameters(xlsx_path, enrollment_date):
     """Imports input data from xlsx
     """
