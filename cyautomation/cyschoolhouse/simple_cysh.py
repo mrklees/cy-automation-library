@@ -3,9 +3,9 @@ from simple_salesforce import Salesforce
 
 def init_cysh(sandbox=False):
     if sandbox==False:
-        creds_path = 'C:\\Users\\City_Year\\Desktop\\salesforce_credentials.txt'
+        creds_path = 'salesforce_credentials.txt'
     else:
-        creds_path = 'C:\\Users\\City_Year\\Desktop\\salesforce_credentials_sb.txt'
+        creds_path = 'salesforce_credentials_sb.txt'
     
     with open(creds_path, 'r') as f:
         read_data = f.read()
@@ -124,7 +124,7 @@ def section_enrollment_sync(source_section, destination_section, enrollment_star
     
     to_enroll_df = to_enroll_df.loc[~to_enroll_df['Section__c_to_Enroll'].isnull()]
     
-    print(f"Enrolling {len(to_enroll_df)} students to {destination_section} sections.")
+    print(f"Enrolling {len(to_enroll_df)} students from {source_section} to {destination_section} sections.")
     
     results = []
     for index, row in to_enroll_df.iterrows():
