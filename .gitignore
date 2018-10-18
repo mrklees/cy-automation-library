@@ -8,3 +8,4 @@ cyautomation/cyschoolhouse/input_files/*
 cyautomation/cyschoolhouse/.ipynb_checkpoints/*
 cyautomation/cyschoolhouse/temp/*
 cyautomation/cyschoolhouse/salesforce_credentials.txt
+cyautomation/cyschoolhouse/salesforce_credentials_sb.txt
