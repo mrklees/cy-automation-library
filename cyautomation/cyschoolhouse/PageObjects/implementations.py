@@ -38,6 +38,7 @@ class BaseImplementation(object):
         else:
             self.driver = driver
 
+
 class Okta(BaseImplementation):
     """Object for handingling Okta
     
@@ -96,7 +97,8 @@ class IndicatorAreaEnrollment(Okta):
     """Implementation object for Indicator Area Enrollment"""
     from pandas import read_excel
     
-    data = read_excel('input_files/indiactor_area_roster.xlsx')
+    data = read_excel
+    ut_files/indiactor_area_roster.xlsx')
     student_list = data['Student: Student ID'].unique()
     
     def nav_to_form(self):
