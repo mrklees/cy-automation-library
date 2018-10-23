@@ -3,6 +3,7 @@ from selenium.webdriver.support.ui import Select
 from simple_cysh import *
 from time import sleep
 import numpy as np
+import os
 
 ## This is how the task would be accomplished via salesforce API, if only I could edit the fields:
 #

@@ -12,8 +12,8 @@ def import_parameters():
     """Import configuration data from Excel.
     """
     data = pd.read_excel('input_files/section-creator-input.xlsx')
-    data['Start_Date'] = data['Start_Date'].dt.strftime('%m/%d/%Y')
-    data['End_Date'] = data['End_Date'].dt.strftime('%m/%d/%Y')
+    data['Start_Date'] = pd.to_datetime(data['Start_Date']).dt.strftime('%m/%d/%Y')
+    data['End_Date'] = pd.to_datetime(data['End_Date']).dt.strftime('%m/%d/%Y')
     data.fillna('', inplace=True)
     data.replace('NaT', '', inplace=True)
     return data.to_dict(orient='records')
