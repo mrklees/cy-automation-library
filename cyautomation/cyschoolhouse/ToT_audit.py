@@ -2,26 +2,25 @@ import os
 from simple_cysh import *
 from StyleFrame import StyleFrame, Styler, utils
 
-def fix_t1t2_entries():
-    """ Standardize common spellings of "T1" and "T2"
+def ToT_fix_T1T2ELT():
+    """ Standardize common spellings of "T1" "T2" and "ELT"
     """
     
-    t1t2_fixes = {
-        't1': 'T1',
-        'Tier 1': 'T1', 'Tier1': 'T1', 'tier 1': 'T1', 'tier1': 'T1',
-        'Teir 1': 'T1', 'Teir1': 'T1', 'teir 1': 'T1', 'teir1': 'T1',
-        't2': 'T2',
-        'Tier 2': 'T2', 'Tier2': 'T2', 'tier 2': 'T2', 'tier2': 'T2',
-        'Teir 2': 'T2', 'Teir2': 'T2', 'teir 2': 'T2', 'teir2': 'T2',
+    typo_map = {
+        r'([Tt](ie|ei)r ?|t)(1|[Oo]ne)':'T1',
+        r'([Tt](ie|ei)r ?|t)(2|[Tt]wo)':'T2',
+        r'([Aa]fter ?[Ss]chool|ASP)':'ELT',
     }
-    
+
+    all_typos = '|'.join(list(typo_map.keys()))
+
     df = get_cysh_df('Intervention_Session__c', ['Id', 'Comments__c'], rename_id=True)
+    df['Comments__c'].fillna('', inplace=True)
+    df = df.loc[df['Comments__c'].str.contains(all_typos)]
+
+    df['Comments__c'].replace(typo_map, regex=True, inplace=True)
     
-    df = df.loc[(df['Comments__c'].str.contains('|'.join(list(t1t2_fixes.keys())))==True)]
-    
-    df['Comments__c'].replace(t1t2_fixes, inplace=True, regex=True)
-    
-    print(f"Found {len(df)} T1/T2 labels that can be fixed")
+    print(f"Found {len(df)} T1, T2, or ELT labels that can be fixed")
     
     results = []
     for index, row in df.iterrows():
@@ -30,8 +29,8 @@ def fix_t1t2_entries():
     
     return results
 
-def get_ToT_error_table():
-    ISR_df = get_cysh_df('Intervention_Session_Result__c', ['Amount_of_Time__c', 'IsDeleted', 'Intervention_Session_Date__c', 'Related_Student_s_Name__c', 'Intervention_Session__c'])
+def ToT_get_error_table():
+    ISR_df = get_cysh_df('Intervention_Session_Result__c', ['Amount_of_Time__c', 'IsDeleted', 'Intervention_Session_Date__c', 'Related_Student_s_Name__c', 'Intervention_Session__c', 'CreatedDate'])
     IS_df = get_cysh_df('Intervention_Session__c', ['Id', 'Name', 'Comments__c', 'Section__c'], rename_id=True, rename_name=True)
     section_df = get_cysh_df('Section__c', ['Id', 'School__c', 'Intervention_Primary_Staff__c', 'Program__c'], rename_id=True)
 
@@ -48,24 +47,35 @@ def get_ToT_error_table():
     df = df.merge(staff_df, how='left', left_on='Intervention_Primary_Staff__c', right_on='Staff__c'); del df['Intervention_Primary_Staff__c'], df['Staff__c']
     df = df.merge(program_df, how='left', on='Program__c'); del df['Program__c']
 
+    df['Comments__c'].fillna('', inplace=True)
+    
     df.loc[df['Program__c_Name'].str.contains('Tutoring')
-           & (df['Comments__c'].str.contains('T1|T2') != True), 'Missing T1/T2 Code'] = 'Missing T1/T2 Code'
+           & ~df['Comments__c'].str.contains('T1|T2'), 'Missing T1/T2 Code'] = 'Missing T1/T2 Code'
+    
+    df.loc[df['Program__c_Name'].str.contains('Tutoring')
+           & df['Comments__c'].str.contains('T1')
+           & df['Comments__c'].str.contains('T2'), 'Both T1 & T2'] = 'Both T1 & T2'
 
     df.loc[df['Program__c_Name'].str.contains('Tutoring|SEL')
            & (df['Amount_of_Time__c'] < 10), '<10 Minutes'] = '<10 Minutes'
 
     df.loc[df['Program__c_Name'].str.contains('Tutoring')
            & (df['Amount_of_Time__c'] > 120), '>120 Minutes'] = '>120 Minutes'
-
-    df['Comments__c'].fillna('', inplace=True)
     
-    df['Error'] = df[['Missing T1/T2 Code', '<10 Minutes', '>120 Minutes']].apply(lambda x: x.str.cat(sep=' & '), axis=1)
+    df.loc[pd.to_datetime(df['Intervention_Session_Date__c']) > pd.to_datetime(df['CreatedDate']), 'Logged in Future'] = 'Logged in Future'
+
+    df.loc[df['Program__c_Name'].isin(['DESSA', 'Math Inventory', 'Reading Inventory']), 'Wrong Section'] = 'Wrong Section'
+    
+    error_cols = ['Missing T1/T2 Code', 'Both T1 & T2', '<10 Minutes', '>120 Minutes', 'Logged in Future', 'Wrong Section']
+    
+    df['Error'] = df[error_cols].apply(lambda x: x.str.cat(sep=' & '), axis=1)
 
     df = df.loc[df['Error'] != '']
     
     col_friendly_names = {
         'School_Name__c':'School',
         'Staff__c_Name':'ACM',
+        'Program__c_Name':'Program',
         'Intervention_Session__c_Name':'Session ID',
         'Related_Student_s_Name__c':'Student',
         'Intervention_Session_Date__c':'Date',
@@ -80,7 +90,7 @@ def get_ToT_error_table():
     
     return df
 
-def write_tot_error_tables_to_cyconnect(df):
+def ToT_write_error_tables_to_cyconnect(df):
     sch_ref_df = pd.read_excel(r'Z:\ChiPrivate\Chicago Data and Evaluation\SY19\SY19 School Reference.xlsx')
 
     for index, row in sch_ref_df.iterrows():
