@@ -69,9 +69,9 @@ def fill_one_coaching_log_acm_rollup(wb):
 def fill_all_coaching_log_acm_rollup(school_ref_df):
     for index, row in school_ref_df.iterrows():
         try:
-            wb = xw.Book(f"Z:\{row['Informal Name']} Leadership Team Documents\SY19 Coaching Log - {row['Informal Name']}.xlsx")
+            wb = xw.Book(f"Z:\\{row['Informal Name']} Leadership Team Documents\\SY19 Coaching Log - {row['Informal Name']}.xlsx")
             fill_one_coaching_log_acm_rollup(wb)
-            wb.save(f"Z:\{row['Informal Name']} Leadership Team Documents\SY19 Coaching Log - {row['Informal Name']}.xlsx")
+            wb.save(f"Z:\\{row['Informal Name']} Leadership Team Documents\\SY19 Coaching Log - {row['Informal Name']}.xlsx")
             wb.close()
         except:
             print(f"{row['Informal Name']} failed to generate ACM Rollup sheet")
@@ -109,7 +109,7 @@ def deploy_choaching_logs():
             sheets_added += [sht.name]
 
         try:
-            wb.save(f"Z:\{row['Informal Name']} Leadership Team Documents\SY19 Coaching Log - {row['Informal Name']}.xlsx")
+            wb.save(f"Z:\\{row['Informal Name']} Leadership Team Documents\\SY19 Coaching Log - {row['Informal Name']}.xlsx")
             #wb.save(f"Z:\ChiPrivate\Chicago Data and Evaluation\SY19\Tests\SY19 Coaching Log - {row['Informal Name']}.xlsx")
         except:
             print(f"Save failed {row['Informal Name']}")
@@ -127,10 +127,10 @@ def deploy_tracker(resource, containing_folder):
     resource like 'SY19 Attendance Tracker' or 'SY19 Leadership Tracker'
     containing_folder like 'Team Documents' or 'Leadership Team Documents'
     """
-    template_path = f'Z:\ChiPrivate\Chicago Data and Evaluation\SY19\Templates\{resource} Template.xlsx'
+    template_path = f'Z:\\ChiPrivate\\Chicago Data and Evaluation\\SY19\\Templates\\{resource} Template.xlsx'
     wb = xw.Book(template_path)
     
-    school_ref_path = r'Z:\ChiPrivate\Chicago Data and Evaluation\SY19\SY19 School Reference.xlsx'
+    school_ref_path = r'Z:\\ChiPrivate\\Chicago Data and Evaluation\\SY19\\SY19 School Reference.xlsx'
     school_ref_df = pd.read_excel(school_ref_path)
     
     for index, row in school_ref_df.iterrows():
@@ -138,7 +138,7 @@ def deploy_tracker(resource, containing_folder):
         wb.sheets['Tracker'].range('A1').value = f"{resource} - {row['Informal Name']}"
         
         try:
-            wb.save(f"Z:\{row['Informal Name']} {containing_folder}\{resource} - {row['Informal Name']}.xlsx")
+            wb.save(f"Z:\\{row['Informal Name']} {containing_folder}\\{resource} - {row['Informal Name']}.xlsx")
         except:
             print(f"Save failed {row['Informal Name']}")
             pass
@@ -146,14 +146,14 @@ def deploy_tracker(resource, containing_folder):
     wb.close()
 
 def update_all_validation_sheets(resource, containing_folder):
-    school_ref_path = r'Z:\ChiPrivate\Chicago Data and Evaluation\SY19\SY19 School Reference.xlsx'
+    school_ref_path = r'Z:\\ChiPrivate\\Chicago Data and Evaluation\\SY19\\SY19 School Reference.xlsx'
     school_ref_df = pd.read_excel(school_ref_path)
     
     staff_df = get_staff_df()
     att_df = get_attendance_roster()
     
     for index, row in school_ref_df.iterrows():     
-        wb = xw.Book(f"Z:\{row['Informal Name']} {containing_folder}\{resource} - {row['Informal Name']}.xlsx")
+        wb = xw.Book(f"Z:\\{row['Informal Name']} {containing_folder}\\{resource} - {row['Informal Name']}.xlsx")
         sheet_names = [x.name for x in wb.sheets]
         
         school_staff = staff_df.loc[(staff_df['School']==row['School']) & 
@@ -168,7 +168,7 @@ def update_all_validation_sheets(resource, containing_folder):
             wb.sheets['Student Validation'].range('A1').options(index=False, header=False).value = school_att_df[['Student_Name__c', 'Student__c']]
         
         try:
-            wb.save(f"Z:\{row['Informal Name']} {containing_folder}\{resource} - {row['Informal Name']}.xlsx")
+            wb.save(f"Z:\\{row['Informal Name']} {containing_folder}\\{resource} - {row['Informal Name']}.xlsx")
         except:
             print(f"Failed to update {resource} sheets for: {row['Informal Name']}")
             pass
