@@ -1,7 +1,8 @@
 import pandas as pd
-import simple_cysh as cysh
 import os
-import xlwings as xw # Excel must be closed prior to running script
+import xlwings as xw
+
+import simple_cysh as cysh
 
 def get_staff_df():
     staff_df = cysh.get_object_df('Staff__c', ['Individual__c', 'First_Name_Staff__c', 'Name', 'Organization__c', 'Role__c', 'Staff_Last_Name__c'], where="Site__c = 'Chicago'")

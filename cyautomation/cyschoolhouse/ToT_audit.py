@@ -1,11 +1,12 @@
 import os
 import pandas as pd
-import simple_cysh as cysh
 from StyleFrame import StyleFrame, Styler, utils
+
+import simple_cysh as cysh
 
 sf = cysh.init_sf_session(sandbox=False)
 
-def fix_T1T2ELT(sf=sf):
+def fix_T1T2ELT(sf=cysh.sf):
     """ Standardize common spellings of "T1" "T2" and "ELT"
     """
 
@@ -50,6 +51,8 @@ def get_error_table():
     df = df.merge(staff_df, how='left', left_on='Intervention_Primary_Staff__c', right_on='Staff__c'); del df['Intervention_Primary_Staff__c'], df['Staff__c']
     df = df.merge(program_df, how='left', on='Program__c'); del df['Program__c']
 
+    df['Intervention_Session_Date__c'] = pd.to_datetime(df['Intervention_Session_Date__c']).dt.date
+    df['CreatedDate'] = pd.to_datetime(df['CreatedDate']).dt.date
     df['Comments__c'].fillna('', inplace=True)
 
     df.loc[df['Program__c_Name'].str.contains('Tutoring')
@@ -65,7 +68,7 @@ def get_error_table():
     df.loc[df['Program__c_Name'].str.contains('Tutoring')
            & (df['Amount_of_Time__c'] > 120), '>120 Minutes'] = '>120 Minutes'
 
-    df.loc[pd.to_datetime(df['Intervention_Session_Date__c']) > pd.to_datetime(df['CreatedDate']), 'Logged in Future'] = 'Logged in Future'
+    df.loc[df['Intervention_Session_Date__c'] > df['CreatedDate'], 'Logged in Future'] = 'Logged in Future'
 
     df.loc[df['Program__c_Name'].isin(['DESSA', 'Math Inventory', 'Reading Inventory']), 'Wrong Section'] = 'Wrong Section'
 
@@ -81,7 +84,8 @@ def get_error_table():
         'Program__c_Name':'Program',
         'Intervention_Session__c_Name':'Session ID',
         'Related_Student_s_Name__c':'Student',
-        'Intervention_Session_Date__c':'Date',
+        'CreatedDate':'Submission Date',
+        'Intervention_Session_Date__c':'Session Date',
         'Amount_of_Time__c':'ToT',
         #'Comments__c':'Comment',
         'Error':'Error',
