@@ -1,5 +1,7 @@
 import os
+
 import pandas as pd
+
 from StyleFrame import StyleFrame, Styler, utils
 
 import simple_cysh as cysh

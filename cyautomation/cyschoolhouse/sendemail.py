@@ -1,8 +1,11 @@
-import smtplib
 from configparser import ConfigParser
 from pathlib import Path
 
+import smtplib
+
 def send_email(to_addrs, subject, body):
+    """ Sends an email to one or multple `to_addrs` email addresses.
+    """
     creds_path = str(Path(__file__).parent / 'credentials.ini')
     
     config = ConfigParser()
