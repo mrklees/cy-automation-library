@@ -4,9 +4,12 @@ Script for the automatic creation of sections in cyschoolhouse. Please ensure
 you have all dependencies, and have set up the input file called "section-creator-input.csv"
 in the input files folder.
 """
-from cyschoolhousesuite import *
-from selenium.webdriver.support.ui import Select
 import logging
+
+from selenium.webdriver.support.ui import Select
+
+from cyschoolhousesuite import *
+
 
 def import_parameters():
     """Import configuration data from Excel.
