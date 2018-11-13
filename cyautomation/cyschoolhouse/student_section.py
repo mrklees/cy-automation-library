@@ -1,6 +1,4 @@
-import simple_cysh as cysh
-
-sf = cysh.init_sf_session()
+from . import simple_cysh as cysh
 
 ## Demo of how to pull student object
 #school_df = cysh.get_object_df('Account', ['Id', 'Name'])
@@ -75,7 +73,7 @@ def enrollment_sync(source_section, destination_section, enrollment_start_date, 
     return results
 
 
-def create_one(student__c, section__c, enrollment_start_date, sf=sf):
+def create_one(student__c, section__c, enrollment_start_date, sf=cysh.sf):
     stu_sect_dict = {
         'Student__c':student__c,
         'Intervention_Enrollment_Start_Date__c':enrollment_start_date,
@@ -87,7 +85,7 @@ def create_one(student__c, section__c, enrollment_start_date, sf=sf):
 
     return result
 
-def exit_one(student_section_id, exit_date, exit_reason, sf=sf):
+def exit_one(student_section_id, exit_date, exit_reason, sf=cysh.sf):
     """
     exit_date in the format YYYY-MM-DD
     exit_reason used in CHI: 'School Year ended'
@@ -100,7 +98,7 @@ def exit_one(student_section_id, exit_date, exit_reason, sf=sf):
 
     return result
 
-def undo_exit_one(student_section_id, sf=sf):
+def undo_exit_one(student_section_id, sf=cysh.sf):
     result = {}
     result['student_section_id'] = student_section_id
     result['Active__c'] = sf.Student_Section__c.update(student_section_id, {'Active__c':True})
@@ -109,7 +107,7 @@ def undo_exit_one(student_section_id, sf=sf):
 
     return result
 
-def exit_all(exit_date, exit_reason, sf=sf):
+def exit_all(exit_date, exit_reason, sf=cysh.sf):
     """
     exit_date in the format YYYY-MM-DD
     exit_reason used: 'School Year ended'

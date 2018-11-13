@@ -1,33 +1,17 @@
 from pathlib import Path
 
+import pandas as pd
 from PyPDF2 import PdfFileMerger
 import xlwings as xw
 
-import simple_cysh as cysh
+from . import simple_cysh as cysh
 
-def get_section_enrollment_table(sch_ref_df, sections_of_interest):
-    # load salesforce tables
-    student_section_df = cysh.get_object_df('Student_Section__c', [
-        'Id', 'Name', 'Student_Program__c', 'Program__c', 'Section__c',
-        'Active__c', 'Enrollment_End_Date__c', 'Student__c', 
-        'Student_Name__c', 'Dosage_to_Date__c', 'School_Reference_Id__c',
-        'Student_Grade__c',
-    ], rename_id=True)
-    
-    section_df = cysh.get_object_df('Section__c', ['Id', 'Intervention_Primary_Staff__c'], rename_id=True)
-    staff_df = cysh.get_object_df('Staff__c', ['Id', 'Name'], rename_id=True, rename_name=True)
-    program_df = cysh.get_object_df('Program__c', ['Id', 'Name'], rename_id=True, rename_name=True)
+def get_section_enrollment_table(sections_of_interest):
+    df = cysh.get_student_section_staff_df(sections_of_interest)
 
-    # merge salesforce tables
-    df = student_section_df.merge(section_df, how='left', on='Section__c')
-    df = df.merge(staff_df, how='left', left_on='Intervention_Primary_Staff__c', right_on='Staff__c')
-    df = df.merge(program_df, how='left', on='Program__c')
-
-    df = df.loc[df['Program__c_Name'].isin(sections_of_interest)]                
-    
     # group by Student_Program__c, then sum ToT
     df = df.join(df.groupby('Student_Program__c')['Dosage_to_Date__c'].sum(), how='left', on='Student_Program__c', rsuffix='_r')
-    
+
     # filter out inactive students
     df = df.loc[(df['Active__c']==True) & df['Enrollment_End_Date__c'].isnull()]
 
@@ -44,7 +28,7 @@ def get_section_enrollment_table(sch_ref_df, sections_of_interest):
     ], inplace = True)
 
     df = df[['School_Reference_Id__c', 'Staff__c_Name', 'Program__c_Name', 'Student_Name__c', 'Dosage_to_Write']]
-    
+
     return df
 
 def fill_and_save_one_acm_pdf(acm_df, acm_name, main_sht, header_sht, CP_sht, SEL_sht, att_sht, logf):
@@ -73,7 +57,7 @@ def fill_and_save_one_acm_pdf(acm_df, acm_name, main_sht, header_sht, CP_sht, SE
     att_sht.range('B4').options(index=False, header=False).value = df_acm_attendance['Student_Name__c'][0:3]
     att_sht.range('F4').options(index=False, header=False).value = df_acm_attendance['Student_Name__c'][3:6]
 
-    main_sht.api.ExportAsFixedFormat(0, str(Path(__file__) / 'temp' / f"{acm_name}.pdf"))
+    main_sht.api.ExportAsFixedFormat(0, str(Path(__file__).parent / 'temp' / f"{acm_name}.pdf"))
 
 def merge_and_save_one_school_pdf(school_informal_name):
     # Merge team PDFs
@@ -92,23 +76,24 @@ def merge_and_save_one_school_pdf(school_informal_name):
     for filepath in temp_files:
         filepath.unlink()
 
-def update_service_trackers():       
-    logf = open(Path.cwd() / 'Service Tracker Log.log', "w")
-    
-    # sch_ref_df table should contain fields 'School' and 'Informal Name'
-    sch_ref_df = pd.read_excel('Z:\\ChiPrivate\\Chicago Data and Evaluation\\SY19\\SY19 School Reference.xlsx')
-    
-    sections_of_interest = [
-        'Coaching: Attendance',
-        'SEL Check In Check Out',
-        'Tutoring: Literacy',
-        'Tutoring: Math',
-    ]
-                
-    student_section_df = get_section_enrollment_table(sch_ref_df, sections_of_interest)
-               
+def update_service_trackers(sch_ref_df_path='Z:\\ChiPrivate\\Chicago Data and Evaluation\\SY19\\SY19 School Reference.xlsx', start_row=0):
+    """ Runs the entire Service Tracker publishing process
+    """
+    logf = open(Path(__file__).parent / 'log' / 'Service Tracker Log.log', "w")
+
+    sch_ref_df = pd.read_excel(sch_ref_df_path)
+
+    student_section_df = get_section_enrollment_table(
+        sections_of_interest= [
+            'Coaching: Attendance',
+            'SEL Check In Check Out',
+            'Tutoring: Literacy',
+            'Tutoring: Math',
+        ]
+    )
+
     # Open Excel Template and define sheet references
-    xlsx_path = Path(__file__).parent / 'Service Tracker Template.xlsx'
+    xlsx_path = Path(__file__).parent / 'templates' / 'Service Tracker Template.xlsx'
     wb = xw.Book(str(xlsx_path))
 
     main_sht = wb.sheets['Service Tracker']
@@ -116,30 +101,30 @@ def update_service_trackers():
     CP_sht = wb.sheets['Course Performance']
     SEL_sht = wb.sheets['SEL']
     att_sht = wb.sheets['Attendance CICO']
-    
+
     for filepath in (Path(__file__).parent / 'temp').iterdir():
         filepath.unlink()
-    
+
     # Iterate through school names to build Service Tracker PDFs
-    for school in student_section_df['School_Reference_Id__c'].unique():
+    for school in student_section_df['School_Reference_Id__c'].unique()[start_row:]:
         logf.write(f"Writing Service Tracker: {school}\n")
         print(f"Writing Service Tracker: {school}\n")
 
         df_school = student_section_df.loc[student_section_df['School_Reference_Id__c'] == school].copy()
 
-        # Look up school's informal name
-        school_informal_name = sch_ref_df.loc[sch_ref_df['School'] == school, 'Informal Name'].values[0]
-
         for acm_name in df_school['Staff__c_Name'].unique():
             acm_df = df_school.loc[df_school['Staff__c_Name'] == acm_name].copy()
-            
+
             try:
                 fill_and_save_one_acm_pdf(acm_df, acm_name, main_sht, header_sht, CP_sht, SEL_sht, att_sht, logf)
             except Exception as e:
                 logf.write(f"Error filling template or saving pdf for {acm_name}: {e}\n")
                 print(f"Error filling template or saving pdf for {acm_name}: {e}\n")
                 pass
-        
+
+        # Look up school's informal name
+        school_informal_name = sch_ref_df.loc[sch_ref_df['School'] == school, 'Informal Name'].values[0]
+
         merge_and_save_one_school_pdf(school_informal_name)
 
     wb.close()

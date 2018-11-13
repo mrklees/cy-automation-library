@@ -6,10 +6,10 @@ from simple_salesforce import Salesforce
 
 def init_sf_session(sandbox=False):
     creds_path = str(Path(__file__).parent / 'credentials.ini')
-    
+
     config = ConfigParser()
     config.read(creds_path)
-    
+
     if sandbox==True:
         sf_creds = config['Salesforce Sandbox']
     else:
@@ -75,6 +75,65 @@ def get_object_df(object_name, field_list=None, where=None, rename_id=False, ren
         df.rename(columns={'Name':(object_name+'_Name')}, inplace=True)
 
     return df
+
+def get_section_df(sections_of_interest):
+    if type(sections_of_interest)==str:
+        sections_of_interest = list(sections_of_interest)
+
+    section_df = get_object_df('Section__c', ['Id', 'Name', 'Intervention_Primary_Staff__c', 'Program__c'], rename_id=True, rename_name=True)
+
+    program_df = get_object_df('Program__c', ['Id', 'Name'], rename_id=True, rename_name=True)
+
+    df = section_df.merge(program_df, how='left', on='Program__c')
+
+    df = df.loc[df['Program__c_Name'].isin(sections_of_interest)]
+
+    return df
+
+def get_student_section_staff_df(sections_of_interest):
+    if type(sections_of_interest)==str:
+        sections_of_interest = [sections_of_interest]
+
+    # load salesforce tables
+    program_df = get_object_df('Program__c', ['Id', 'Name'], where=f"Name IN ({str(sections_of_interest)[1:-1]})", rename_id=True, rename_name=True)
+
+    student_section_df = get_object_df('Student_Section__c', [
+        'Id', 'Name', 'Student_Program__c', 'Program__c', 'Section__c',
+        'Active__c', 'Enrollment_End_Date__c', 'Student__c',
+        'Student_Name__c', 'Dosage_to_Date__c', 'School_Reference_Id__c',
+        'Student_Grade__c', 'School__c'
+    ], where=f"Program__c IN ({str(program_df['Program__c'].tolist())[1:-1]})", rename_id=True, rename_name=True)
+
+    section_df = get_object_df(
+        'Section__c',
+        ['Id', 'Intervention_Primary_Staff__c'],
+        where=f"Program__c IN ({str(program_df['Program__c'].tolist())[1:-1]})", rename_id=True
+    )
+    staff_df = get_object_df('Staff__c', ['Id', 'Name'], rename_id=True, rename_name=True)
+
+    # merge salesforce tables
+    df = student_section_df.merge(section_df, how='left', on='Section__c')
+    df = df.merge(staff_df, how='left', left_on='Intervention_Primary_Staff__c', right_on='Staff__c')
+    df = df.merge(program_df, how='left', on='Program__c')
+
+    df = df.loc[df['Program__c_Name'].isin(sections_of_interest)]
+
+    return df
+
+def get_staff_df():
+    school_df = get_object_df('Account', ['Id', 'Name'])
+    school_df.rename(columns={'Id':'Organization__c', 'Name':'School'}, inplace=True)
+
+    staff_df = get_object_df(
+        'Staff__c',
+        ['Id', 'Individual__c', 'Name', 'First_Name_Staff__c', 'Staff_Last_Name__c', 'Role__c', 'Email__c', 'Organization__c'],
+        where=f"Organization__c IN ({str(school_df['Organization__c'].tolist())[1:-1]})",
+        rename_name=True, rename_id=True
+    )
+
+    staff_df = staff_df.merge(school_df, how='left', on='Organization__c')
+
+    return staff_df
 
 object_reference = [
     'Name',

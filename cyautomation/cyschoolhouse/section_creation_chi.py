@@ -1,24 +1,7 @@
 import pandas as pd
 
-import simple_cysh as cysh
+from . import simple_cysh as cysh
 
-def get_section_df(sections_of_interest):
-    section_df = cysh.get_object_df('Section__c', ['Id', 'Name', 'Intervention_Primary_Staff__c', 'Program__c'], rename_id=True, rename_name=True)
-    
-    staff_df = cysh.get_object_df('Staff__c', ['Id', 'Name', 'Role__c', 'Organization__c'], where="Site__c='Chicago'", rename_name=True)
-    
-    program_df = cysh.get_object_df('Program__c', ['Id', 'Name'], rename_id=True, rename_name=True)
-    
-    school_df = cysh.get_object_df('Account', ['Id', 'Name'])
-    school_df.rename(columns={'Id':'School__c', 'Name':'School'}, inplace=True)
-    
-    df = section_df.merge(staff_df, how='left', left_on='Intervention_Primary_Staff__c', right_on='Id')
-    df = df.merge(program_df, how='left', on='Program__c')
-    df = df.merge(school_df, how='left', left_on='Organization__c', right_on='School__c')
-    
-    df = df.loc[df['Program__c_Name'].isin(sections_of_interest)]
-    
-    return df
 
 def academic_sections_to_create():
     """
@@ -54,52 +37,52 @@ def academic_sections_to_create():
     acm_dep_df.reset_index(inplace=True)
 
     acm_dep_df = pd.melt(
-        acm_dep_df, 
-        id_vars=['ACM', 'Informal Name'], 
+        acm_dep_df,
+        id_vars=['ACM', 'Informal Name'],
         value_vars=['SectionName_MATH', 'SectionName_ELA'],
         value_name='SectionName'
     )
     acm_dep_df = acm_dep_df.loc[~acm_dep_df['SectionName'].isnull() & (acm_dep_df['SectionName'] != '')]
     acm_dep_df = acm_dep_df.sort_values('ACM')
     acm_dep_df['key'] = acm_dep_df['ACM'] + acm_dep_df['SectionName']
-    
-    section_df = get_section_df(sections_of_interest=['Tutoring: Literacy', 'Tutoring: Math'])
+
+    section_df = cysh.get_section_df(sections_of_interest=['Tutoring: Literacy', 'Tutoring: Math'])
+    staff_df = cysh. get_staff_df()
+    section_df = section_df.merge(staff_df, how='left', left_on='Intervention_Primary_Staff__c', right_on='Staff__c')
     section_df['key'] = section_df['Staff__c_Name'] + section_df['Program__c_Name']
-    
-    staff_df = cysh.get_object_df('Staff__c', ['Id', 'Name', 'Role__c', 'Organization__c'], where="Site__c='Chicago'")
-    
+
     acm_dep_df = acm_dep_df.loc[
-        acm_dep_df['ACM'].isin(staff_df['Name']) & 
+        acm_dep_df['ACM'].isin(staff_df['Staff__c_Name']) &
         ~acm_dep_df['key'].isin(section_df['key'])
     ]
-    
+
     sch_ref_df = pd.read_excel(r'Z:\ChiPrivate\Chicago Data and Evaluation\SY19\SY19 School Reference.xlsx')
-    
+
     df = acm_dep_df.merge(sch_ref_df[['School', 'Informal Name']], how='left', on='Informal Name')
-    
+
     df = df[['School', 'ACM', 'SectionName']]
     df['In_School_or_Extended_Learning'] = 'In School'
     df['Start_Date'] = '09/04/2018'
     df['End_Date'] = '06/07/2019'
     df['Target_Dosage'] = 0
-    
+
     return df
 
 def non_CP_sections_to_create(sections_of_interest=['Coaching: Attendance', 'SEL Check In Check Out']):
     """
     Produce table of sections to create, with the assumption that all 'Corps Member' roles should have 1 of each section.
     """
-    section_df = get_section_df(sections_of_interest)
+    section_df = cysh.get_section_df(sections_of_interest)
     section_df['key'] = section_df['Intervention_Primary_Staff__c'] + section_df['Program__c_Name']
-    
+
     staff_df = cysh.get_object_df('Staff__c', ['Id', 'Name', 'Role__c', 'Organization__c'], where="Site__c='Chicago'", rename_name=True)
     school_df = cysh.get_object_df('Account', ['Id', 'Name'])
     school_df.rename(columns={'Id':'School__c', 'Name':'School'}, inplace=True)
     staff_df = staff_df.merge(school_df, how='left', left_on='Organization__c', right_on='School__c')
-    
+
     acm_df = staff_df.loc[staff_df['Role__c'].str.contains('Corps Member')==True].copy()
     acm_df['key'] = 1
-    
+
     section_deployment = pd.DataFrame.from_dict({'SectionName': sections_of_interest})
     section_deployment['key'] = 1
 
@@ -151,7 +134,7 @@ def MIRI_sections_to_create():
     section_df = section_df.loc[section_df['Program__c_Name'].str.contains('Tutoring')]
 
     section_df['Program__c_Name'] = section_df['Program__c_Name'].map({
-        'Tutoring: Literacy':'Reading Inventory', 
+        'Tutoring: Literacy':'Reading Inventory',
         'Tutoring: Math':'Math Inventory'
     })
 
@@ -179,12 +162,12 @@ def deactivate_all_sections(section_type):
     # De-activate 50 Acts sections
     section_df = cysh.get_object_df('Section__c', ['Id', 'Name', 'Intervention_Primary_Staff__c', 'School__c', 'Program__c', 'Active__c'], rename_id=True, rename_name=True)
     program_df = cysh.get_object_df('Program__c', ['Id', 'Name'], rename_id=True, rename_name=True)
-    
+
     df = section_df.merge(program_df, how='left', on='Program__c')
 
     sections_to_delete = df.loc[
-        (df['Program__c_Name']==section_type) & 
-        (section_df['Active__c']==True), 
+        (df['Program__c_Name']==section_type) &
+        (section_df['Active__c']==True),
         'Section__c'
     ]
 

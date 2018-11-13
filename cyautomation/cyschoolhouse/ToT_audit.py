@@ -1,12 +1,10 @@
 import os
 
 import pandas as pd
-
 from StyleFrame import StyleFrame, Styler, utils
 
-import simple_cysh as cysh
+from . import simple_cysh as cysh
 
-sf = cysh.init_sf_session(sandbox=False)
 
 def fix_T1T2ELT(sf=cysh.sf):
     """ Standardize common spellings of "T1" "T2" and "ELT"
