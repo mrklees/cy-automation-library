@@ -68,7 +68,8 @@ def prep_coaching_log():
         wb.sheets['ACM1 (2)'].name = f'ACM{x}'
 
 def deploy_choaching_logs():
-    ## Multiply by Schools
+    """ Multiply by Schools
+    """
     for index, row in school_ref_df.iterrows():
         school_staff = staff_df.loc[(staff_df['School']==row['School']) &
                                     staff_df['Role__c'].str.contains('Corps Member')]
@@ -124,12 +125,33 @@ def deploy_tracker(resource_type, containing_folder, school_ref_path = r'Z:\\Chi
 
     wb.close()
 
+def unprotect_ACM_validation_sheet(resource_type, containing_folder, school_ref_path = 'Z:\\ChiPrivate\\Chicago Data and Evaluation\\SY19\\SY19 School Reference.xlsx'):
+    import win32com.client
+    import pandas as pd
+
+    xcl = win32com.client.Dispatch('Excel.Application')
+    xcl.visible = True
+    xcl.DisplayAlerts = False
+
+    school_ref_df = pd.read_excel(school_ref_path)
+
+    for index, row in school_ref_df.iterrows():
+        wb = xcl.workbooks.open(f"Z:\\{row['Informal Name']} {containing_folder}\\{resource_type} - {row['Informal Name']}.xlsx")
+
+        for sheet_name in ['ACM Validation']:
+            wb.Sheets(sheet_name).Unprotect()
+
+        wb.Close(True, xlsx_path)
+
+    xcl.Quit()
+
 def update_all_validation_sheets(resource_type, containing_folder, school_ref_path = 'Z:\\ChiPrivate\\Chicago Data and Evaluation\\SY19\\SY19 School Reference.xlsx'):
     school_ref_df = pd.read_excel(school_ref_path)
 
     staff_df = cysh.get_staff_df()
     staff_df['First_Name_Staff__c'] = staff_df['First_Name_Staff__c'] + " " + staff_df['Staff_Last_Name__c'].astype(str).str[0] + "."
     staff_df.sort_values('First_Name_Staff__c', inplace=True)
+    staff_df = staff_df.loc[staff_df['Role__c'].str.contains('Corps Member|Team Leader') == True]
 
     if 'Attendance' in resource_type:
         att_df = cysh.get_student_section_staff_df(sections_of_interest='Coaching: Attendance')
@@ -139,20 +161,19 @@ def update_all_validation_sheets(resource_type, containing_folder, school_ref_pa
         wb = xw.Book(f"Z:\\{row['Informal Name']} {containing_folder}\\{resource_type} - {row['Informal Name']}.xlsx")
         sheet_names = [x.name for x in wb.sheets]
 
-        school_staff = staff_df.loc[
-            (staff_df['School']==row['School']) &
-            (staff_df['Role__c'].str.contains('Corps Member')==True)
-        ].copy()
+        school_staff = staff_df.loc[staff_df['School'] == row['School']].copy()
 
-        wb.sheets['ACM Validation'].range('A:F').clear_contents()
+        wb.sheets['ACM Validation'].clear_contents()
         wb.sheets['ACM Validation'].range('A1').options(index=False, header=False).value = school_staff[[
             'Individual__c', 'First_Name_Staff__c', 'Staff__c_Name'
         ]]
 
         if 'Student Validation' in sheet_names and 'Attendance' in resource_type:
             school_att_df = att_df.loc[att_df['School__c']==row['School']].copy()
-            wb.sheets['Student Validation'].range('A:B').clear_contents()
-            wb.sheets['Student Validation'].range('A1').options(index=False, header=False).value = school_att_df[['Student_Name__c', 'Student__c']]
+            wb.sheets['Student Validation'].clear_contents()
+            wb.sheets['Student Validation'].range('A1').options(index=False, header=False).value = school_att_df[[
+                'Student_Name__c', 'Student__c'
+            ]]
 
         try:
             wb.save(f"Z:\\{row['Informal Name']} {containing_folder}\\{resource_type} - {row['Informal Name']}.xlsx")

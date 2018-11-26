@@ -11,8 +11,8 @@ def fix_T1T2ELT(sf=cysh.sf):
     """
 
     typo_map = {
-        r'([Tt](ie|ei)r ?|t)(1|[Oo]ne)':'T1',
-        r'([Tt](ie|ei)r ?|t)(2|[Tt]wo)':'T2',
+        r'([Tt]([Ii][Ee]|[Ee][Ii])[Rr] ?|t)(1|[Oo]ne)':'T1',
+        r'([Tt]([Ii][Ee]|[Ee][Ii])[Rr] ?|t)(2|[Tt]wo)':'T2',
         #r'([Aa]fter ?[Ss]chool|ASP)':'ELT',
     }
 
@@ -101,8 +101,7 @@ def write_error_tables_to_cyconnect(df):
     sch_ref_df = pd.read_excel(r'Z:\ChiPrivate\Chicago Data and Evaluation\SY19\SY19 School Reference.xlsx')
 
     for index, row in sch_ref_df.iterrows():
-        print(row['School'])
-        school_error_df = df.loc[df['School']==row['School']].copy()
+        school_error_df = df.loc[df['School'] == row['School']].copy()
         del school_error_df['School']
 
         write_path = f"Z:\\{row['Informal Name']} Team Documents\\SY19 ToT Audit Errors - {row['Informal Name']}.xlsx"

@@ -4,6 +4,16 @@ from pathlib import Path
 import pandas as pd
 from simple_salesforce import Salesforce
 
+__all__ = [
+    'init_sf_session',
+    'get_object_df',
+    'get_object_fields',
+    'get_section_df',
+    'get_student_section_staff_df',
+    'get_staff_df',
+    'sf_object_reference',
+]
+
 def init_sf_session(sandbox=False):
     creds_path = str(Path(__file__).parent / 'credentials.ini')
 
@@ -135,7 +145,7 @@ def get_staff_df():
 
     return staff_df
 
-object_reference = [
+sf_object_reference = [
     'Name',
     'AcceptedEventRelation',
     'Account',
@@ -361,4 +371,4 @@ object_reference = [
     'Community'
 ]
 
-object_reference.sort()
+sf_object_reference.sort()

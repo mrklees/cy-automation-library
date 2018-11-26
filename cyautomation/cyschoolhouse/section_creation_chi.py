@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 
 from . import simple_cysh as cysh
@@ -47,7 +49,7 @@ def academic_sections_to_create():
     acm_dep_df['key'] = acm_dep_df['ACM'] + acm_dep_df['SectionName']
 
     section_df = cysh.get_section_df(sections_of_interest=['Tutoring: Literacy', 'Tutoring: Math'])
-    staff_df = cysh. get_staff_df()
+    staff_df = cysh.get_staff_df()
     section_df = section_df.merge(staff_df, how='left', left_on='Intervention_Primary_Staff__c', right_on='Staff__c')
     section_df['key'] = section_df['Staff__c_Name'] + section_df['Program__c_Name']
 
@@ -65,7 +67,9 @@ def academic_sections_to_create():
     df['Start_Date'] = '09/04/2018'
     df['End_Date'] = '06/07/2019'
     df['Target_Dosage'] = 0
-
+    
+    df.to_excel(os.path.join(os.path.dirname(__file__), 'input_files/section-creator-input.xlsx'), index=False)
+    
     return df
 
 def non_CP_sections_to_create(sections_of_interest=['Coaching: Attendance', 'SEL Check In Check Out']):

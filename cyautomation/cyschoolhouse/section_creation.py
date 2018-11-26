@@ -20,7 +20,7 @@ def import_parameters():
     data['End_Date'] = pd.to_datetime(data['End_Date']).dt.strftime('%m/%d/%Y')
     data.fillna('', inplace=True)
     data.replace('NaT', '', inplace=True)
-    return data.to_dict(orient='records')
+    return data
 
 def input_staff_name(driver, staff_name):
     """Selects the staff name from the drop down
@@ -92,10 +92,10 @@ def create_single_section(school, acm, sectionname, insch_extlrn, start_date, en
     fill_static_elements(driver, insch_extlrn, start_date, end_date, target_dosage)
     sleep(1)
     save_section(driver)
-    logging.info(f"Created {parameter['SectionName']} section for {parameter['ACM']}")
-    if 'Nickname' in parameter.keys():
-        if parameter['Nickname'] != "":
-            update_nickname(driver, parameter['Nickname'])
+    logging.info(f"Created {sectionname} section for {acm}")
+    if nickname is not None:
+        if nickname != "":
+            update_nickname(driver, nickname)
 
 def section_creation(driver=None):
     """ Runs the entire script.
@@ -104,13 +104,13 @@ def section_creation(driver=None):
 
     if driver is None:
         driver = get_driver()
-        open_cyschoolhouse(driver)
+        open_cyschoolhouse(driver=driver)
 
     for index, row in params.iterrows():
         try:
-            create_single_section(driver, school=row['School'], acm=row['ACM'], sectionname=row['SectionName'],
+            create_single_section(school=row['School'], acm=row['ACM'], sectionname=row['SectionName'],
                 insch_extlrn=row['In_School_or_Extended_Learning'], start_date=row['Start_Date'], end_date=row['End_Date'],
-                target_dosage=row['Target_Dosage'])
+                target_dosage=row['Target_Dosage'], driver=driver)
         except:
             print(f"Section creation failed: {row['ACM']}, {row['SectionName']}")
             logging.error(f"Section creation failed: {row['ACM']}, {row['SectionName']}")
