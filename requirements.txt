@@ -1,0 +1,5 @@
+numpy
+pandas
+selenium
+simple_salesforce
+xlwings
