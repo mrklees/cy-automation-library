@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 
-CHICAGO_USER = True
+USER_SITE = 'Chicago'
 
 SANDBOX = False
 

@@ -4,7 +4,7 @@ import pandas as pd
 import xlwings as xw
 
 from . import simple_cysh as cysh
-    
+
 
 def fill_one_coaching_log_acm_rollup(wb):
     sht = wb.sheets['ACM Rollup']
@@ -137,7 +137,8 @@ def unprotect_ACM_validation_sheet(resource_type, containing_folder, school_ref_
     school_ref_df = pd.read_excel(school_ref_path)
 
     for index, row in school_ref_df.iterrows():
-        wb = xcl.workbooks.open(f"Z:\\{row['Informal Name']} {containing_folder}\\{resource_type} - {row['Informal Name']}.xlsx")
+        xlsx_path = f"Z:\\{row['Informal Name']} {containing_folder}\\{resource_type} - {row['Informal Name']}.xlsx"
+        wb = xcl.workbooks.open(xlsx_path)
         wb.Sheets('ACM Validation').Unprotect()
         wb.Close(True, xlsx_path)
 
