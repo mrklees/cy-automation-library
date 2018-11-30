@@ -1,8 +1,9 @@
-from configparser import ConfigParser
 from pathlib import Path
 
 import pandas as pd
 from simple_salesforce import Salesforce
+
+from .config import *
 
 __all__ = [
     'init_sf_session',
@@ -14,27 +15,18 @@ __all__ = [
     'sf_object_reference',
 ]
 
-def init_sf_session(sandbox=False):
-    creds_path = str(Path(__file__).parent / 'credentials.ini')
 
-    config = ConfigParser()
-    config.read(creds_path)
-
-    if sandbox==True:
-        sf_creds = config['Salesforce Sandbox']
-    else:
-        sf_creds = config['Salesforce']
-
+def init_sf_session():
     sf = Salesforce(
-        instance_url=sf_creds['instance_url'],
-        password=sf_creds['password'],
-        username=sf_creds['username'],
-        security_token=sf_creds['security_token']
+        instance_url=SF_URL,
+        password=SF_PASS,
+        username=SF_USER,
+        security_token=SF_TOKN
     )
 
     return sf
 
-sf = init_sf_session(sandbox=False)
+sf = init_sf_session()
 
 def get_object_fields(object_name, sf=sf):
     one_id = sf.query(f"SELECT Id FROM {object_name} LIMIT 1")['records']

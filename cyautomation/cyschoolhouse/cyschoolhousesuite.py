@@ -5,7 +5,6 @@ accessing data on cyschoolhouse. This will include navigation functions, logins,
 and other common tasks we can antipicate needing to do for multiple products.
 """
 
-from configparser import ConfigParser
 import io, getpass, logging
 from pathlib import Path
 from time import time, sleep
@@ -18,22 +17,17 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 
+from .config import *
 
-creds_path = str(Path(__file__).parent / 'credentials.ini')
-gecko_path = str(Path(__file__).parents[2] / 'geckodriver/geckodriver.exe')
-log_path = str(Path(__file__).parent / 'log')
-temp_path = str(Path(__file__).parent / 'temp')
-templates_path =str(Path(__file__).parent / 'templates')
-instance_url = "https://na82.salesforce.com"
-sb_instance_url = "https://cs59.salesforce.com"
+
+GECKO_PATH = str(Path(__file__).parents[2] / 'geckodriver/geckodriver.exe')
+LOG_PATH = str(Path(__file__).parent / 'log')
+TEMP_PATH = str(Path(__file__).parent / 'temp')
+TEMPLATES_PATH =str(Path(__file__).parent / 'templates')
+
 
 def get_login_credentials(prompt_user_pass=False):
     """Extract login information from credentials.ini
-
-    Expects a file named `credentials.ini` in the same directory as this module, formatted as:
-        [Single Sign On]
-        username = <your Okta username>
-        password = <your Okta password>
 
     Optionally, set prompt_user_pass to `True` and supply credentials interactively.
     It's a little more secure to enter the user/pass every time, but it requires the user to
@@ -42,12 +36,8 @@ def get_login_credentials(prompt_user_pass=False):
     """
 
     if prompt_user_pass == False:
-        config = ConfigParser()
-        config.read(creds_path)
-
-        creds = config['Salesforce']
-        user = creds['username']
-        pwd = creds['password']
+        user = SF_USER
+        pwd = SF_PASS
     else:
         print('Please enter your City Year Okta credential below.')
         print('It is used for sign in only and is not stored in any way after the script closes.')
@@ -63,14 +53,14 @@ def get_driver():
 
     Returns the Firefox driver object and handles the path.
     """
-    configure_log(log_path)
+    configure_log(LOG_PATH)
 
     profile = FirefoxProfile()
     profile.set_preference('browser.download.folderList', 2)
     profile.set_preference('browser.download.manager.showWhenStarting', False)
-    profile.set_preference('browser.download.dir', temp_path)
+    profile.set_preference('browser.download.dir', TEMP_PATH)
     profile.set_preference('browser.helperApps.neverAsk.saveToDisk', ('application/csv,text/csv,application/vnd.ms-excel,application/x-msexcel,application/excel,application/x-excel,text/comma-separated-values'))
-    return Firefox(firefox_profile=profile, executable_path=gecko_path)
+    return Firefox(firefox_profile=profile, executable_path=GECKO_PATH)
 
 def standard_login(driver, prompt_user_pass=False):
     """ Login to salesforce using the standard element names "username" and "password"
@@ -82,17 +72,15 @@ def standard_login(driver, prompt_user_pass=False):
     driver.find_element_by_name("pw").send_keys(pwd + Keys.RETURN)
     return driver
 
-def open_cyschoolhouse(driver=None, prompt_user_pass=False, sandbox=False):
+def open_cyschoolhouse(driver=None, prompt_user_pass=False):
     """Opens the cyschoolhouse instance
 
+    You will need to monitor your email inbox at this point to copy+paste an authentication code.
     """
     if driver is None:
         driver = get_driver()
 
-    if sandbox == True:
-        driver.get(sb_instance_url)
-    else:
-        driver.get(instance_url)
+    driver.get(SF_URL)
 
     WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.NAME, "username")))
 
@@ -110,7 +98,7 @@ def configure_log(log_folder):
     of the name.
     """
     timestamp = str(time()).split(".")[0]
-    logging.basicConfig(filename=str(Path(log_path) / f"update_{timestamp}.log"), level=logging.INFO)
+    logging.basicConfig(filename=str(Path(LOG_PATH) / f"update_{timestamp}.log"), level=logging.INFO)
 
 def get_report(report_key):
     driver = get_driver()
@@ -137,5 +125,5 @@ def fancy_box_wait(driver, waittime=10):
 
 if __name__ == '__main__':
     driver = get_driver()
-    driver = open_cyschoolhouse(driver, sandbox=True)
+    driver = open_cyschoolhouse(driver)
     driver.quit()
