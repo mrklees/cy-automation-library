@@ -5,7 +5,7 @@ accessing data on cyschoolhouse. This will include navigation functions, logins,
 and other common tasks we can antipicate needing to do for multiple products.
 """
 
-import io, getpass, logging
+import io, getpass, logging, pickle
 from pathlib import Path
 from time import time, sleep
 
@@ -20,11 +20,8 @@ from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 from .config import *
 
 
+COOKIES_PATH = str(Path(__file__).parent / 'cookies')
 GECKO_PATH = str(Path(__file__).parents[2] / 'geckodriver/geckodriver.exe')
-LOG_PATH = str(Path(__file__).parent / 'log')
-TEMP_PATH = str(Path(__file__).parent / 'temp')
-TEMPLATES_PATH =str(Path(__file__).parent / 'templates')
-
 
 def get_login_credentials(prompt_user_pass=False):
     """Extract login information from credentials.ini

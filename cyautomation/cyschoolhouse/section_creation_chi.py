@@ -2,8 +2,11 @@ import os
 
 import pandas as pd
 
+from .config import get_sch_ref_df
 from . import simple_cysh as cysh
 
+
+sch_ref_df = get_sch_ref_df()
 
 def academic_sections_to_create():
     """
@@ -58,8 +61,6 @@ def academic_sections_to_create():
         ~acm_dep_df['key'].isin(section_df['key'])
     ]
 
-    sch_ref_df = pd.read_excel(r'Z:\ChiPrivate\Chicago Data and Evaluation\SY19\SY19 School Reference.xlsx')
-
     df = acm_dep_df.merge(sch_ref_df[['School', 'Informal Name']], how='left', on='Informal Name')
 
     df = df[['School', 'ACM', 'SectionName']]
@@ -67,9 +68,9 @@ def academic_sections_to_create():
     df['Start_Date'] = '09/04/2018'
     df['End_Date'] = '06/07/2019'
     df['Target_Dosage'] = 0
-    
+
     df.to_excel(os.path.join(os.path.dirname(__file__), 'input_files/section-creator-input.xlsx'), index=False)
-    
+
     return df
 
 def non_CP_sections_to_create(sections_of_interest=['Coaching: Attendance', 'SEL Check In Check Out']):

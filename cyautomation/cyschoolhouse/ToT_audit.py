@@ -3,8 +3,11 @@ import os
 import pandas as pd
 from StyleFrame import StyleFrame, Styler, utils
 
+from .config import get_sch_ref_df
 from . import simple_cysh as cysh
 
+
+sch_ref_df = get_sch_ref_df()
 
 def fix_T1T2ELT(sf=cysh.sf):
     """ Standardize common spellings of "T1" "T2" and "ELT"
@@ -98,8 +101,6 @@ def get_error_table():
     return df
 
 def write_error_tables_to_cyconnect(df):
-    sch_ref_df = pd.read_excel(r'Z:\ChiPrivate\Chicago Data and Evaluation\SY19\SY19 School Reference.xlsx')
-
     for index, row in sch_ref_df.iterrows():
         school_error_df = df.loc[df['School'] == row['School']].copy()
         del school_error_df['School']

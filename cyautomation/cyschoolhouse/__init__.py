@@ -1,5 +1,5 @@
 #from .cyschoolhousesuite import *
-from .config import SF_PASS, SF_URL, SF_USER, SF_TOKN, USER_SITE
+from .config import *
 from .simple_cysh import *
 
 from . import section_creation

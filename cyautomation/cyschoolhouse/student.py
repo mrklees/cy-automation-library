@@ -9,29 +9,32 @@ from . import simple_cysh as cysh
 from .cyschoolhousesuite import get_driver, open_cyschoolhouse
 from .sendemail import send_email
 
-## This is how the task would be accomplished via salesforce API, if only I could edit the fields:
-#
-# df = pd.read_excel(r'C:\Users\City_Year\Downloads\New Students for cyschoolhouse(1-11).xlsx')
-# school_df = get_cysh_df('Account', ['Id', 'Name'])
-# df = df.merge(school_df, how='left', left_on='School', right_on='Name')
-#
-# drop_ids = []
-# for index, row in df.iterrows():
-#     search_result = cysh.sf.query(f"SELECT Id FROM Student__c WHERE Local_Student_ID__c = '{row['Student CPS ID']}'")
-#     if len(search_result['records']) > 0:
-#         drop_ids.append(row['Student CPS ID'])
-# df = df.loc[~df['Student CPS ID'].isin(drop_ids)]
-#
-# for index, row in df.iterrows():
-#     stu_dict = {
-#         'Local_Student_ID__c':str(row['Student CPS ID']),
-#         'School__c':row['Id'],
-#         'Name':(row['Student First Name'] + ' ' + row['Student Last Name']),
-#         'Student_Last_Name__c':row['Student Last Name'],
-#         'Grade__c':str(row['Student Grade Level']),
-#         #'School_Name__c':row['Name_y'],
-#     }
+def _sf_api_approach():
+    """ This is how the task would be accomplished via salesforce API, if only I could edit the fields:
+    """
 
+    df = pd.read_excel(r'C:\Users\City_Year\Downloads\New Students for cyschoolhouse(1-11).xlsx')
+    school_df = get_cysh_df('Account', ['Id', 'Name'])
+    df = df.merge(school_df, how='left', left_on='School', right_on='Name')
+
+    drop_ids = []
+    for index, row in df.iterrows():
+        search_result = cysh.sf.query(f"SELECT Id FROM Student__c WHERE Local_Student_ID__c = '{row['Student CPS ID']}'")
+        if len(search_result['records']) > 0:
+            drop_ids.append(row['Student CPS ID'])
+    df = df.loc[~df['Student CPS ID'].isin(drop_ids)]
+
+    for index, row in df.iterrows():
+        stu_dict = {
+            'Local_Student_ID__c':str(row['Student CPS ID']),
+            'School__c':row['Id'],
+            'Name':(row['Student First Name'] + ' ' + row['Student Last Name']),
+            'Student_Last_Name__c':row['Student Last Name'],
+            'Grade__c':str(row['Student Grade Level']),
+            #'School_Name__c':row['Name_y'],
+         }
+
+    return None
 
 def import_parameters(xlsx_path, enrollment_date):
     """Imports input data from xlsx
@@ -115,6 +118,7 @@ def upload_all(enrollment_date, xlsx_dir=os.path.join(os.path.dirname(__file__),
     setup_df = setup_df.loc[~setup_df['Id'].isnull()]
 
     if len(params) == 0:
+        print(f'No new students to upload.')
         return None
 
     driver = get_driver()
@@ -147,6 +151,8 @@ def upload_all(enrollment_date, xlsx_dir=os.path.join(os.path.dirname(__file__),
         driver.find_element_by_css_selector('input.red_btn').click()
         sleep(3)
 
+        print(f"Uploaded {len(df_csv)} students")
+
         os.remove(path_to_csv)
 
     # Email school manager to inform of successful student upload
@@ -174,12 +180,20 @@ def update_student_External_Id(prefix='CPS_', sf=cysh.sf):
     """ Updates 'External_Id__c' field to 'CPS_' + 'Local_Student_ID__c'. Triggers external integrations at HQ.
     """
     school_df = cysh.get_object_df('Account', ['Id', 'Name'])
-    student_df = cysh.get_object_df('Student__c', ['Id', 'Local_Student_ID__c', 'External_Id__c'], where=f"School__c IN ({str(school_df['Id'].tolist())[1:-1]})")
+    student_df = cysh.get_object_df(
+        'Student__c',
+        ['Id', 'Local_Student_ID__c', 'External_Id__c'],
+        where=f"School__c IN ({str(school_df['Id'].tolist())[1:-1]})"
+    )
 
     if sum(student_df['Local_Student_ID__c'].duplicated()) > 0:
         raise ValueError(f'Error: Duplicates exist on Local_Student_ID__c.')
 
     student_df = student_df.loc[student_df['External_Id__c'].isnull() & (student_df['Local_Student_ID__c'].str.len()==8)]
+
+    if len(student_df) == 0:
+        print(f'No students to fix IDs for.')
+        return None
 
     results = []
     for index, row in student_df.iterrows():

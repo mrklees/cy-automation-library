@@ -2,9 +2,14 @@ from pathlib import Path
 
 import pandas as pd
 from PyPDF2 import PdfFileMerger
+from time import sleep
 import xlwings as xw
 
+from .config import get_sch_ref_df
 from . import simple_cysh as cysh
+
+
+sch_ref_df = get_sch_ref_df()
 
 def get_section_enrollment_table(sections_of_interest):
     df = cysh.get_student_section_staff_df(sections_of_interest)
@@ -31,7 +36,7 @@ def get_section_enrollment_table(sections_of_interest):
 
     return df
 
-def fill_and_save_one_acm_pdf(acm_df, acm_name, main_sht, header_sht, CP_sht, SEL_sht, att_sht, logf):
+def fill_one_acm_wb(acm_df, acm_name, header_sht, CP_sht, SEL_sht, att_sht, logf):
     # Write header
     header_sht.range('A1').options(index=False, header=False).value = acm_name
 
@@ -57,31 +62,25 @@ def fill_and_save_one_acm_pdf(acm_df, acm_name, main_sht, header_sht, CP_sht, SE
     att_sht.range('B4').options(index=False, header=False).value = df_acm_attendance['Student_Name__c'][0:3]
     att_sht.range('F4').options(index=False, header=False).value = df_acm_attendance['Student_Name__c'][3:6]
 
-    main_sht.api.ExportAsFixedFormat(0, str(Path(__file__).parent / 'temp' / f"{acm_name}.pdf"))
+    return None
 
 def merge_and_save_one_school_pdf(school_informal_name):
     # Merge team PDFs
-    temp_files = []
     merger = PdfFileMerger()
     for filepath in (Path(__file__).parent / 'temp').iterdir():
         if '.pdf' in str(filepath):
             merger.append(str(filepath))
-            temp_files.append(filepath)
 
     # Edit this write path to match your Sharepoint file structure
     merger.write(f"Z:\\{school_informal_name} Team Documents\\SY19 Weekly Service Trackers - {school_informal_name}.pdf")
     merger.close()
 
-    # remove local data
-    for filepath in temp_files:
-        filepath.unlink()
+    return None
 
-def update_service_trackers(sch_ref_df_path='Z:\\ChiPrivate\\Chicago Data and Evaluation\\SY19\\SY19 School Reference.xlsx', start_row=0):
+def update_service_trackers(sch_ref_df, start_row=0):
     """ Runs the entire Service Tracker publishing process
     """
     logf = open(Path(__file__).parent / 'log' / 'Service Tracker Log.log', "w")
-
-    sch_ref_df = pd.read_excel(sch_ref_df_path)
 
     student_section_df = get_section_enrollment_table(
         sections_of_interest= [
@@ -102,11 +101,12 @@ def update_service_trackers(sch_ref_df_path='Z:\\ChiPrivate\\Chicago Data and Ev
     SEL_sht = wb.sheets['SEL']
     att_sht = wb.sheets['Attendance CICO']
 
-    for filepath in (Path(__file__).parent / 'temp').iterdir():
-        filepath.unlink()
-
     # Iterate through school names to build Service Tracker PDFs
     for school in student_section_df['School_Reference_Id__c'].unique()[start_row:]:
+        # Ensure `temp` folder is empty
+        for filepath in (Path(__file__).parent / 'temp').iterdir():
+            filepath.unlink()
+
         logf.write(f"Writing Service Tracker: {school}\n")
         print(f"Writing Service Tracker: {school}\n")
 
@@ -116,10 +116,13 @@ def update_service_trackers(sch_ref_df_path='Z:\\ChiPrivate\\Chicago Data and Ev
             acm_df = df_school.loc[df_school['Staff__c_Name'] == acm_name].copy()
 
             try:
-                fill_and_save_one_acm_pdf(acm_df, acm_name, main_sht, header_sht, CP_sht, SEL_sht, att_sht, logf)
+                fill_one_acm_wb(acm_df, acm_name, header_sht, CP_sht, SEL_sht, att_sht, logf)
+                # main_sht.api.SaveAs(str(Path(__file__).parent / 'temp' / f"{acm_name}.pdf"), FileFormat=57)
+                main_sht.api.ExportAsFixedFormat(0, str(Path(__file__).parent / 'temp' / f"{acm_name}.pdf"))
             except Exception as e:
                 logf.write(f"Error filling template or saving pdf for {acm_name}: {e}\n")
                 print(f"Error filling template or saving pdf for {acm_name}: {e}\n")
+                wb = xw.Book(str(xlsx_path))
                 pass
 
         # Look up school's informal name
