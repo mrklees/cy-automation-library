@@ -6,5 +6,5 @@ setup(name='cyautomation',
       url='https://github.com/mrklees/cy-automation-library',
       author='Alex Perusse',
       license='MIT',
-      packages=['cyautomation'],
+      packages=['cyautomation.cyschoolhouse'],
       zip_safe=False)

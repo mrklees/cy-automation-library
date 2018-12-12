@@ -1,151 +1,106 @@
 # -*- coding: utf-8 -*-
 """cyschoolhouse Suite
-This suite is a set of helper functions which address the broader task of 
+This suite is a set of helper functions which address the broader task of
 accessing data on cyschoolhouse. This will include navigation functions, logins,
-and other common tasks we can antipicate needing to do for multiple products. 
+and other common tasks we can antipicate needing to do for multiple products.
 """
 
+import io, getpass, logging, pickle
 from pathlib import Path
 from time import time, sleep
-import getpass
-import logging
+
+import pandas as pd
 from seleniumrequests import Firefox
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
 from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
-import pandas as pd
-import io
 
-"""Configuration Variables
+from .config import *
 
-The below variables are used to configure some machine specific details. Unfortunately
-I don't know how we can avoid needing some of these variables for the potentially
-arbitrary machine and file system we might get.  
-"""
-# Location of the file with my SSO username and password
-key_file_path = str(Path.home() / 'Desktop/keyfile.txt')
-gecko_path = str(Path.cwd().parents[1] / 'geckodriver/geckodriver.exe')
-log_path = str(Path.cwd().parents[1] / 'cyautomation/cyschoolhouse/log')
-temp_path = str(Path.cwd().parents[1] / 'cyautomation/cyschoolhouse/temp')
-templates_path =str(Path.cwd().parents[1] / 'cyautomation/cyschoolhouse/templates')
 
-def extract_key():
-    """Extract SSO Information from keyfile
-    
-    One practice I use here is to store my SSO in a keyfile instead of either
-    entering it in the cmd prompt on each run or hardcoding it in the program. 
-    Keyfile should be formatted like so:
-        'descript:cityyear sso/user:aperusse/pass:p@ssw0rd'
-    Simply replace the username and password with your credentials and then save
-    it as keyfile.txt
+COOKIES_PATH = str(Path(__file__).parent / 'cookies')
+GECKO_PATH = str(Path(__file__).parents[2] / 'geckodriver/geckodriver.exe')
+
+def get_login_credentials(prompt_user_pass=False):
+    """Extract login information from credentials.ini
+
+    Optionally, set prompt_user_pass to `True` and supply credentials interactively.
+    It's a little more secure to enter the user/pass every time, but it requires the user to
+    be present at script initialization. If you intend to run on a schedule, then
+    be prepared to store your credentials in a file.
     """
-    with open(key_file_path) as file:
-        keys = file.read()
-    split_line = keys.split("/")
-    entries = [item.split(":")[1] for item in split_line]
-    desc, user, pwd = entries
-    return user, pwd
 
-def request_key():
-    """Requests user credentials
-    
-    Added as a handy way to capture the SSO credentials from the user.  However, the interaction
-    kills the fully automated aspect of the code.  
-    """
-    print('Please enter your City Year Okta credential below.')
-    print('It is used for sign in only and is not stored in any way after the script closes.')
-    user = input('Username:')
-    # If you run from the cmd prompt, it won't show your password.  It will in an interactive
-    # console though, so keep that in mind. 
-    pwd = getpass.getpass()
+    if prompt_user_pass == False:
+        user = SF_USER
+        pwd = SF_PASS
+    else:
+        print('Please enter your City Year Okta credential below.')
+        print('It is used for sign in only and is not stored in any way after the script closes.')
+        user = input('Username:')
+        # If you run from the cmd prompt, it won't show your password.  It will in an interactive
+        # console though, so keep that in mind.
+        pwd = getpass.getpass()
+
     return user, pwd
 
 def get_driver():
     """Get Firefox driver
-    
-    Returns# the Firefox driver object and handles the path. 
+
+    Returns the Firefox driver object and handles the path.
     """
-    configure_log(log_path)
-    
+    configure_log(LOG_PATH)
+
     profile = FirefoxProfile()
     profile.set_preference('browser.download.folderList', 2)
     profile.set_preference('browser.download.manager.showWhenStarting', False)
-    profile.set_preference('browser.download.dir', temp_path)
+    profile.set_preference('browser.download.dir', TEMP_PATH)
     profile.set_preference('browser.helperApps.neverAsk.saveToDisk', ('application/csv,text/csv,application/vnd.ms-excel,application/x-msexcel,application/excel,application/x-excel,text/comma-separated-values'))
-    return Firefox(firefox_profile=profile, executable_path=gecko_path)
+    return Firefox(firefox_profile=profile, executable_path=GECKO_PATH)
 
-def standard_login(driver):
-    """# Login to a form using the standard element names "username" and "password"
-    
-    User preference on how login is collected. It's probably a little more secure
-    to enter the user/pass every time, however that will require that you be
-    there to initialize the script.  If you intend to run on a schedule then
-    be prepared to store your credentials in a file.  Ideally, we would have 
-    slightly better security around that filer.
+def standard_login(driver, prompt_user_pass=False):
+    """ Login to salesforce using the standard element names "username" and "password"
     """
 
-    user, pwd = extract_key()
-    #user, pwd = request_key()
+    user, pwd = get_login_credentials(prompt_user_pass)
+
     driver.find_element_by_name("username").send_keys(user)
-    driver.find_element_by_name("password").send_keys(pwd + Keys.RETURN)
+    driver.find_element_by_name("pw").send_keys(pwd + Keys.RETURN)
     return driver
 
-def open_okta(driver):
-    """Logs into Okta via the front door.
+def open_cyschoolhouse(driver=None, prompt_user_pass=False):
+    """Opens the cyschoolhouse instance
+
+    You will need to monitor your email inbox at this point to copy+paste an authentication code.
     """
-    # Open Okta login
-    logging.info(":".join([str(time()), "Opening Okta"]))
-    driver.get("https://cityyear.okta.com")
-    # Input login
+    if driver is None:
+        driver = get_driver()
+
+    driver.get(SF_URL)
+
     WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.NAME, "username")))
-    driver = standard_login(driver)
-    # Wait for next page to load
-    WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.NAME, "app-link")))
-    # Check that we aren't in the login page anymore
-    assert 'login' not in driver.current_url
-    return driver
 
-def open_cyschoolhouse18(driver):
-    """Opens the 2018 cyschoolhouse instance
-    
-    """
-    #driver.implicitly_wait(10)
-    driver = open_okta(driver)
-    driver.get("https://cityyear.okta.com/home/salesforce/0oao08nxmQCYJQHUHCBU/46?fromHome=true")
-    # Wait for next page to load
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "tsidLabel")))
-    assert 'salesforce' in driver.current_url
-    return driver
+    driver = standard_login(driver, prompt_user_pass)
 
-def open_cyschoolhouse18_sb(driver):
-    """Opens the 208 cyschoolhouse sandbox instance
-    
-    """
-    driver.implicitly_wait(10)
-    driver = open_okta(driver)
-    logging.debug(":".join([str(time()), "Opening cyschoolhouse FY18 sandbox"]))
-    driver.get("https://cityyear.okta.com/home/salesforce/0oa1dt5ae7mOkRt3O0h8/46?fromHome=true")
-    # Wait for next page to load
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "tsidLabel")))
+    # Wait for next page to load - user will need to supply 2 Factor Authentication during this time
+    WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.ID, "tsidLabel")))
     assert 'salesforce' in driver.current_url
     return driver
 
 def configure_log(log_folder):
     """Configures the log for update cycle
-    
+
     Generates a log file for this session. Uses a timestamp from the time library to as a part
-    of the name. 
+    of the name.
     """
     timestamp = str(time()).split(".")[0]
-    logging.basicConfig(filename="".join([log_folder, '/update_', timestamp, '.log']), level=logging.INFO)
+    logging.basicConfig(filename=str(Path(LOG_PATH) / f"update_{timestamp}.log"), level=logging.INFO)
 
 def get_report(report_key):
     driver = get_driver()
-    open_cyschoolhouse18(driver)
-    url = 'https://na24.salesforce.com/' + report_key + '?export=1&enc=UTF-8&xf=csv'
+    open_cyschoolhouse(driver)
+    url = 'https://na30.salesforce.com/' + report_key + '?export=1&enc=UTF-8&xf=csv'
     response = driver.request('GET', url)
     df = pd.read_csv(io.StringIO(response.content.decode('utf-8')))
     driver.quit()
@@ -158,8 +113,14 @@ def delete_folder(pth):
         else:
             sub.unlink()
     pth.rmdir()
-    
-#if __name__ == '__main__':
-#    driver = get_driver()
-#    driver = open_cyschoolhouse18_sb(driver)
-#    driver.quit()
+
+def fancy_box_wait(driver, waittime=10):
+    WebDriverWait(driver, waittime).until(EC.presence_of_element_located((By.XPATH, ".//div[contains(@id, 'fancybox-wrap')]")))
+    WebDriverWait(driver, (waittime+30)).until(EC.invisibility_of_element_located((By.XPATH, ".//div[contains(@id, 'fancybox-wrap')]")))
+    sleep(2)
+    return driver
+
+if __name__ == '__main__':
+    driver = get_driver()
+    driver = open_cyschoolhouse(driver)
+    driver.quit()

@@ -1,11 +1,16 @@
-
+*.egg-info/
+*.ipynb_checkpoints*
 *.log
 *.pyc
-selenium-testing/testfile.csv
-/batch-files/*
 *.bat
+*CHI - *
+/batch-files/*
+selenium-testing/testfile.csv
 cyautomation/cyschoolhouse/input_files/*
-cyautomation/cyschoolhouse/.ipynb_checkpoints/*
 cyautomation/cyschoolhouse/temp/*
+<<<<<<< HEAD
 cyautomation/cyschoolhouse/.vscode/settings.json
 cyautomation/sftp/.ipynb_checkpoints/*
+=======
+cyautomation/cyschoolhouse/credentials.ini
+>>>>>>> 31813a934d81690eb99295f333389e522d2e802b
