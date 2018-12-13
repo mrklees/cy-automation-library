@@ -10,13 +10,12 @@ To dive into the tools, navigate into cyautomation and then select the relevant 
 but more detailed readme files exist for each product in their respective folders.
 
 ## Table of Contents
-
+1. `cyschoolhouse`
+   * An adapter for cyschoolhouse that supports automated actions and database queries. Supports section creation, student uploads, syncing student enrollment across multiple sections, and sending email.
+1. `excel-updater`
+   * A tool for updating Excel Workbooks. Can currently update excel workbooks, handle sheet protection and hiding, and provides a structure for writing functions to update specific workbooks in a particular order.
 1. `selenium-testing` (testing only)
-  * This folder is largely a set of testing scripts used as a proof of concept of a few different features of Selenium, and is only relevant if you're interested in some of the more advanced features that are being tested.  
-* `cyschoolhouse`
- * An adapter for cyschoolhouse that supports automated actions and database queries. Supports section creation, student uploads, syncing student enrollment across multiple sections, and sending email.
-* `excel-updater`
- * A tool for updating Excel Workbooks. Can currently update excel workbooks, handle sheet protection and hiding, and provides a structure for writing functions to update specific workbooks in a particular order.
+   * This folder is largely a set of testing scripts used as a proof of concept of a few different features of Selenium, and is only relevant if you're interested in some of the more advanced features that are being tested.
 
 ## How to contribute!
 
