@@ -79,7 +79,15 @@ def get_error_table():
 
     df['Error'] = df[error_cols].apply(lambda x: x.str.cat(sep=' & '), axis=1)
 
-    df = df.loc[df['Error'] != '']
+    accepted_errors_df = pd.read_excel((
+        "Z:\\ChiPrivate\\Chicago Data and Evaluation\\SY19\\"
+        "SY19 ToT Audit Accepted Errors.xlsx"
+    ))
+
+    df = df.loc[
+        (df['Error'] != '') &
+        ~df['Intervention_Session__c_Name'].isin(accepted_errors_df['SESSION_ID'])
+    ]
 
     col_friendly_names = {
         'School_Name__c':'School',

@@ -11,6 +11,7 @@ from . import simple_cysh as cysh
 
 sch_ref_df = get_sch_ref_df()
 
+
 def get_section_enrollment_table(sections_of_interest):
     df = cysh.get_student_section_staff_df(sections_of_interest)
 
@@ -35,6 +36,7 @@ def get_section_enrollment_table(sections_of_interest):
     df = df[['School_Reference_Id__c', 'Staff__c_Name', 'Program__c_Name', 'Student_Name__c', 'Dosage_to_Write']]
 
     return df
+
 
 def fill_one_acm_wb(acm_df, acm_name, header_sht, CP_sht, SEL_sht, att_sht, logf):
     # Write header
@@ -64,6 +66,7 @@ def fill_one_acm_wb(acm_df, acm_name, header_sht, CP_sht, SEL_sht, att_sht, logf
 
     return None
 
+
 def merge_and_save_one_school_pdf(school_informal_name):
     # Merge team PDFs
     merger = PdfFileMerger()
@@ -77,7 +80,8 @@ def merge_and_save_one_school_pdf(school_informal_name):
 
     return None
 
-def update_service_trackers(sch_ref_df, start_row=0):
+
+def update_service_trackers(start_row=0):
     """ Runs the entire Service Tracker publishing process
     """
     logf = open(Path(__file__).parent / 'log' / 'Service Tracker Log.log', "w")
