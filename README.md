@@ -67,7 +67,7 @@ In `config.py`, you can toggle settings such as entering the sandbox environment
 
 ## Usage
 
-For more examples on how Chicago uses these scripts in production, see `CHI-schedule.py`.
+For more examples on how Chicago uses these scripts in production, see `CHI-schedule.py` and `CHI-schedule-nb.ipynb`.
 
 ``` python
 import cyautomation.cyschoolhouse as cysh
