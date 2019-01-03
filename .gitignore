@@ -3,8 +3,8 @@
 *.log
 *.pyc
 *.bat
-*CHI - *
 /batch-files/*
+/chi-notebooks/*
 selenium-testing/testfile.csv
 cyautomation/cyschoolhouse/input_files/*
 cyautomation/cyschoolhouse/temp/*
