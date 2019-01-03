@@ -8,7 +8,7 @@ specified format in Excel.
 
 ## Packages
 
-1. `cyschoolhouse`
+* `cyschoolhouse`
  * An adapter for cyschoolhouse (Salesforce) that supports automated actions and database queries. This package is largely a set of helper functions built around the [simple-salesforce](https://github.com/simple-salesforce/simple-salesforce) package. Currently supports section creation, student uploads, syncing student enrollment across multiple sections, and sending email.
 * `excel-updater`
  * A tool for updating Excel Workbooks. Can currently update excel workbooks, handle sheet protection and hiding, and provides a structure for writing functions to update specific workbooks in a particular order.
@@ -21,13 +21,13 @@ Install Python. If you are new to Python, [see here](README-setup-python.md).
 
 Install GitHub and clone this repository to your computer. In your console, create a virtual environment (optional but recommended), navigate to the repository's root directory, and run `pip install -r requirements.txt`. This will install all the third party Python packages that are required for these tools.
 
-Many scripts are used to manipulate files in cyconnect (SharePoint). This requires that you map SharePoint as a network drive. Follow [this visual guide](README-setup-cyc.md) to set it up.
+Some scripts are used to manipulate files in cyconnect (SharePoint). This requires that the user map SharePoint as a network drive. Follow [this visual guide](README-setup-cyc.md) to set it up.
 
 ## cyschoolhouse Package
 
 Files and folders mentioned in this section are relative to `./cyautomation/cyschoolhouse`.
 
-1. `cyschoolhousesuite.py`
+* `cyschoolhousesuite.py`
  * A suite of wrapper functions for tasks common to anything involved in automating cyschoolhouse.  Allows user to call functions like `open_cyschoolhouse` instead of making direct calls to selenium.
 * `section_creation.py`
  * The set of wrapper functions for creating sections.
@@ -59,7 +59,7 @@ username = <your Okta username>
 password = <your Okta username>
 ```
 
-You can find this information in Salesforce under your user settings ([visual guide](README-setup-sf.py)). Your username should be similar to `username@cityyear.org.cyschorgb`. The password may not be the same as your Okta single sign-on password. You may need to trigger a password reset in order to obtain the password associated with your Salesforce account. To do so, submit a [service ticket](https://mycityyear.force.com/ServiceDesk/500/o).
+You can find this information in Salesforce under your user settings ([visual guide](README-setup-sf.md)). Your username should be similar to `username@cityyear.org.cyschorgb`. The password may not be the same as your Okta single sign-on password. You may need to trigger a password reset in order to obtain the password associated with your Salesforce account. To do so, submit a [service ticket](https://mycityyear.force.com/ServiceDesk/500/o).
 
 #### Config
 
@@ -95,12 +95,8 @@ cysh.get_object_df(
 ## Dependencies
 
 Two important dependencies are [Selenium](http://selenium-python.readthedocs.io/) and
-[selenium-requests](https://github.com/cryzed/Selenium-Requests) which are available via pip.  Make sure to follow the
-Selenium install instructions carefully, particularly in making sure that you have the appropriate driver for the browser
-you would like to use. The current scripts expect you to use Firefox, which uses the
-[gecko driver](https://github.com/mozilla/geckodriver/releases). Besides that, all other packages used are a part of the python core.
-
-You can view all dependencies
+[selenium-requests](https://github.com/cryzed/Selenium-Requests) which are available via pip. The implementation of selenium in this repository expects you to use the Firefox browser with
+[gecko driver](https://github.com/mozilla/geckodriver/releases). This driver is provided here at `./geckodriver/geckodriver.exe`. If you don't trust this executable, you can replace it with the version provided [here](https://github.com/mozilla/geckodriver/releases).
 
 ## Contribute
 
