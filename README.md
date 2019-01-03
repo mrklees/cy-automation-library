@@ -9,9 +9,9 @@ specified format in Excel.
 ## Packages
 
 * `cyschoolhouse`
- * An adapter for cyschoolhouse (Salesforce) that supports automated actions and database queries. This package is largely a set of helper functions built around the [simple-salesforce](https://github.com/simple-salesforce/simple-salesforce) package. Currently supports section creation, student uploads, syncing student enrollment across multiple sections, and sending email.
+  * An adapter for cyschoolhouse (Salesforce) that supports automated actions and database queries. This package is largely a set of helper functions built around the [simple-salesforce](https://github.com/simple-salesforce/simple-salesforce) package. Currently supports section creation, student uploads, syncing student enrollment across multiple sections, and sending email.
 * `excel-updater`
- * A tool for updating Excel Workbooks. Can currently update excel workbooks, handle sheet protection and hiding, and provides a structure for writing functions to update specific workbooks in a particular order.
+  * A tool for updating Excel Workbooks. Can currently update excel workbooks, handle sheet protection and hiding, and provides a structure for writing functions to update specific workbooks in a particular order.
 * `selenium-testing` (testing only)
   * This folder is largely a set of testing scripts used as a proof of concept of a few different features of Selenium, and is only relevant if you're interested in some of the more advanced features that are being tested.  
 
@@ -28,9 +28,9 @@ Some scripts are used to manipulate files in cyconnect (SharePoint). This requir
 Files and folders mentioned in this section are relative to `./cyautomation/cyschoolhouse`.
 
 * `cyschoolhousesuite.py`
- * A suite of wrapper functions for tasks common to anything involved in automating cyschoolhouse.  Allows user to call functions like `open_cyschoolhouse` instead of making direct calls to selenium.
+  * A suite of wrapper functions for tasks common to anything involved in automating cyschoolhouse.  Allows user to call functions like `open_cyschoolhouse` instead of making direct calls to selenium.
 * `section_creation.py`
- * The set of wrapper functions for creating sections.
+  * The set of wrapper functions for creating sections.
 * `service_trackers.py`
   * Generates pdf reports for each AmeriCorps Member on which they can manually track their weekly service implementation.
 * `input_files` folder
