@@ -105,8 +105,8 @@ you keep getting an error when you're running the code, post an issue.  This doe
 
 If you want to contribute code to the project, follow the traditional [GitHub workflow](https://guides.github.com/introduction/flow/):
 1. fork the repository
-* create a branch with a descriptive name
-* implement your code improvements
-* submit a pull request
+1. create a branch with a descriptive name
+1. implement your code improvements
+1. submit a pull request
 
 Alternatively, reach out to Alex at aperusse@cityyear.org or Chris at chrisluedtke@gmail.com.
